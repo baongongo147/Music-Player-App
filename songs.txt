@@ -1,0 +1,200 @@
+1|Hello|Adele|25|295
+2|Shape of You|Ed Sheeran|Divide|233
+3|Blinding Lights|The Weeknd|After Hours|200
+4|Someone Like You|Adele|21|285
+5|Perfect|Ed Sheeran|Divide|263
+6|Levitating|Dua Lipa|Future Nostalgia|203Ca
+7|Rolling in the Deep|Adele|21|228
+8|Stay|Justin Bieber|Justice|141
+9|Bad Guy|Billie Eilish|When We All Fall Asleep|194
+10|Senorita|Shawn Mendes|Single|191
+11|Lost Stars|Adam Levine|Begin Again|267
+12|Havana|Camila Cabello|Camila|217
+13|Watermelon Sugar|Harry Styles|Fine Line|174
+14|Drivers License|Olivia Rodrigo|SOUR|242
+15|Good 4 U|Olivia Rodrigo|SOUR|178
+16|Montero (Call Me By Your Name)|Lil Nas X|MONTERO|137
+17|Industry Baby|Lil Nas X|MONTERO|204
+18|A Sky Full of Stars|Coldplay|Ghost Stories|268
+19|Viva La Vida|Coldplay|Viva La Vida|241
+20|Paradise|Coldplay|Mylo Xyloto|278
+21|Happier Than Ever|Billie Eilish|Happier Than Ever|288
+22|The Box|Roddy Ricch|Please Excuse Me|200
+23|Circles|Post Malone|Hollywood's Bleeding|215
+24|Sunflower|Post Malone|Spider-Man|158
+25|Better Now|Post Malone|Beerbongs & Bentleys|227
+26|Old Town Road|Lil Nas X|7|157
+27|Truth Hurts|Lizzo|Cuz I Love You|173
+28|Don't Start Now|Dua Lipa|Future Nostalgia|183
+29|New Rules|Dua Lipa|Dua Lipa|212
+30|One Kiss|Calvin Harris|Dua Lipa|214
+31|Take Me To Church|Hozier|Hozier|241
+32|Counting Stars|OneRepublic|Native|257
+33|Thunder|Imagine Dragons|Evolve|187
+34|Believer|Imagine Dragons|Evolve|204
+35|Radioactive|Imagine Dragons|Night Visions|187
+36|Ho Hey|The Lumineers|The Lumineers|163
+37|Riptide|Vance Joy|Dream Your Life Away|204
+38|Mess Is Mine|Vance Joy|Dream Your Life Away|253
+39|Budapest|George Ezra|Wanted on Voyage|200
+40|Shotgun|George Ezra|Staying at Tamara's|204
+41|Shape of My Heart|Sting|Ten Summoner's Tales|261
+42|Every Breath You Take|The Police|Synchronicity|253
+43|Bohemian Rhapsody|Queen|A Night at the Opera|355
+44|Don't Stop Me Now|Queen|Jazz|210
+45|We Will Rock You|Queen|News of the World|122
+46|Sweet Child O' Mine|Guns N' Roses|Appetite for Destruction|356
+47|November Rain|Guns N' Roses|Use Your Illusion I|537
+48|Livin' on a Prayer|Bon Jovi|Slippery When Wet|249
+49|It's My Life|Bon Jovi|Crush|224
+50|Always|Bon Jovi|Cross Road|353
+51|Summer of '69|Bryan Adams|Reckless|216
+52|Everything I Do|Bryan Adams|Waking Up the Neighbours|396
+53|Fix You|Coldplay|X&Y|295
+54|Clocks|Coldplay|A Rush of Blood|307
+55|Yellow|Coldplay|Parachutes|269
+56|In The End|Linkin Park|Hybrid Theory|216
+57|Numb|Linkin Park|Meteora|187
+58|Crawling|Linkin Park|Hybrid Theory|209
+59|With Or Without You|U2|The Joshua Tree|296
+60|One|U2|Achtung Baby|276
+61|Beautiful Day|U2|All That You Can't Leave Behind|248
+62|Wonderwall|Oasis|Morning Glory|258
+63|Don't Look Back in Anger|Oasis|Morning Glory|288
+64|Champagne Supernova|Oasis|Morning Glory|433
+65|Smells Like Teen Spirit|Nirvana|Nevermind|301
+66|Come As You Are|Nirvana|Nevermind|233
+67|Lithium|Nirvana|Nevermind|256
+68|Losing My Religion|R.E.M.|Out of Time|268
+69|Everybody Hurts|R.E.M.|Automatic for the People|279
+70|Man on the Moon|R.E.M.|Automatic for the People|312
+71|All I Want Is You|U2|Rattle and Hum|250
+72|Iris|Goo Goo Dolls|Dizzy Up the Girl|270
+73|Slide|Goo Goo Dolls|Dizzy Up the Girl|212
+74|Black Hole Sun|Soundgarden|Superunknown|318
+75|Rusty Cage|Soundgarden|Badmotorfinger|257
+76|Seven Nation Army|The White Stripes|Elephant|232
+77|Fell in Love with a Girl|The White Stripes|White Blood Cells|110
+78|Mr. Brightside|The Killers|Hot Fuss|222
+79|Somebody Told Me|The Killers|Hot Fuss|197
+80|When You Were Young|The Killers|Sam's Town|219
+81|Since U Been Gone|Kelly Clarkson|Breakaway|188
+82|Stronger (What Doesn't Kill You)|Kelly Clarkson|Stronger|205
+83|Rolling in the Deep (Remix)|Adele|21|228
+84|Set Fire to the Rain|Adele|21|241
+85|Skyfall|Adele|Skyfall|267
+86|Make You Feel My Love|Adele|19|203
+87|Chasing Pavements|Adele|19|210
+88|Castle on the Hill|Ed Sheeran|Divide|261
+89|Thinking Out Loud|Ed Sheeran|X|281
+90|Photograph|Ed Sheeran|X|259
+91|Give Me Love|Ed Sheeran|+|256
+92|Bad Habits|Ed Sheeran|=|231
+93|Take Me Back to London|Ed Sheeran|No.6|189
+94|Starboy|The Weeknd|Starboy|230
+95|The Hills|The Weeknd|Beauty Behind the Madness|242
+96|I Feel It Coming|The Weeknd|Starboy|269
+97|Can't Feel My Face|The Weeknd|Beauty Behind the Madness|213
+98|Call Out My Name|The Weeknd|My Dear Melancholy,|228
+99|In Your Eyes|The Weeknd|After Hours|237
+100|God Is a Woman|Ariana Grande|Sweetener|197
+101|Thank U, Next|Ariana Grande|Thank U, Next|207
+102|7 Rings|Ariana Grande|Thank U, Next|159
+103|Side to Side|Ariana Grande|Dangerous Woman|226
+104|Into You|Ariana Grande|Dangerous Woman|244
+105|No Tears Left to Cry|Ariana Grande|Sweetener|206
+106|One Last Time|Ariana Grande|My Everything|197
+107|Stuck with U|Ariana Grande|Single|228
+108|Savage Remix|Megan Thee Stallion|Suga|159
+109|WAP|Cardi B|Single|180
+110|Bodak Yellow|Cardi B|Invasion of Privacy|210
+111|I Like It|Cardi B|Invasion of Privacy|253
+112|Money|Cardi B|Invasion of Privacy|269
+113|Hot Girl Summer|Megan Thee Stallion|Single|179
+114|Sweetest Pie|Dua Lipa|Future Nostalgia|200
+115|Break My Heart|Dua Lipa|Future Nostalgia|221
+116|Physical|Dua Lipa|Future Nostalgia|208
+117|We're Good|Dua Lipa|Future Nostalgia|177
+118|IDGAF|Dua Lipa|Dua Lipa|217
+119|Be the One|Dua Lipa|Dua Lipa|202
+120|Scared to Be Lonely|Dua Lipa|Single|261
+121|Cold Heart|Elton John|The Lockdown Sessions|202
+122|Rocket Man|Elton John|Honky Château|281
+123|Tiny Dancer|Elton John|Madman Across the Water|383
+124|Candle in the Wind|Elton John|Goodbye Yellow Brick Road|232
+125|Your Song|Elton John|Elton John|241
+126|Don't Go Breaking My Heart|Elton John|Single|268
+127|I'm Still Standing|Elton John|Too Low for Zero|181
+128|Hakuna Matata|Elton John|The Lion King|224
+129|Lion King Theme|Elton John|The Lion King|205
+130|Sorry Seems to Be the Hardest Word|Elton John|Blue Moves|212
+131|Imagine|John Lennon|Imagine|181
+132|Give Peace a Chance|John Lennon|Plastic Ono Band|291
+133|Jealous Guy|John Lennon|Imagine|254
+134|Woman|John Lennon|Double Fantasy|213
+135|Instant Karma!|John Lennon|Plastic Ono Band|199
+136|What a Wonderful World|Louis Armstrong|Single|137
+137|La Vie En Rose|Louis Armstrong|Single|202
+138|Mack the Knife|Louis Armstrong|Mack the Knife|187
+139|Hello Dolly|Louis Armstrong|Hello Dolly!|147
+140|Summertime|Louis Armstrong|Porgy and Bess|295
+141|Billie Jean|Michael Jackson|Thriller|294
+142|Thriller|Michael Jackson|Thriller|357
+143|Smooth Criminal|Michael Jackson|Bad|257
+144|Beat It|Michael Jackson|Thriller|258
+145|Man in the Mirror|Michael Jackson|Bad|319
+146|Black or White|Michael Jackson|Dangerous|222
+147|Earth Song|Michael Jackson|HIStory|386
+148|The Way You Make Me Feel|Michael Jackson|Bad|259
+149|Dirty Diana|Michael Jackson|Bad|281
+150|P.Y.T. (Pretty Young Thing)|Michael Jackson|Thriller|238
+151|Like a Prayer|Madonna|Like a Prayer|341
+152|Vogue|Madonna|I'm Breathless|330
+153|Material Girl|Madonna|Like a Virgin|240
+154|Hung Up|Madonna|Confessions on a Dance Floor|336
+155|La Isla Bonita|Madonna|True Blue|272
+156|Into the Groove|Madonna|Like a Virgin|256
+157|Ray of Light|Madonna|Ray of Light|319
+158|Frozen|Madonna|Ray of Light|398
+159|Music|Madonna|Music|212
+160|Papa Don't Preach|Madonna|True Blue|269
+161|Born This Way|Lady Gaga|Born This Way|260
+162|Bad Romance|Lady Gaga|The Fame Monster|296
+163|Poker Face|Lady Gaga|The Fame|223
+164|Shallow|Lady Gaga|A Star Is Born|215
+165|Rain On Me|Lady Gaga|Chromatica|182
+166|Telephone|Lady Gaga|The Fame Monster|220
+167|Always Remember Us This Way|Lady Gaga|A Star Is Born|205
+168|The Edge of Glory|Lady Gaga|Born This Way|320
+169|Just Dance|Lady Gaga|The Fame|242
+170|Judas|Lady Gaga|Born This Way|249
+171|Firework|Katy Perry|Teenage Dream|227
+172|Roar|Katy Perry|Prism|227
+173|Dark Horse|Katy Perry|Prism|215
+174|Hot N Cold|Katy Perry|One of the Boys|220
+175|Last Friday Night (T.G.I.F.)|Katy Perry|Teenage Dream|230
+176|California Gurls|Katy Perry|Teenage Dream|234
+177|Waking Up in Vegas|Katy Perry|One of the Boys|217
+178|The One That Got Away|Katy Perry|Teenage Dream|227
+179|E.T.|Katy Perry|Teenage Dream|206
+180|Part of Me|Katy Perry|Teenage Dream|216
+181|Love Story|Taylor Swift|Fearless|235
+182|Shake It Off|Taylor Swift|1989|219
+183|Blank Space|Taylor Swift|1989|231
+184|You Belong With Me|Taylor Swift|Fearless|232
+185|Bad Blood|Taylor Swift|1989|211
+186|Style|Taylor Swift|1989|229
+187|I Knew You Were Trouble|Taylor Swift|Red|219
+188|We Are Never Ever Getting Back Together|Taylor Swift|Red|193
+189|Delicate|Taylor Swift|Reputation|232
+190|Cruel Summer|Taylor Swift|Lover|178
+191|Old Man|Neil Young|Harvest|204
+192|Heart of Gold|Neil Young|Harvest|187
+193|The Needle and the Damage Done|Neil Young|Harvest|137
+194|Harvest Moon|Neil Young|Harvest Moon|303
+195|Down By the River|Neil Young|Everybody Knows|552
+196|Rockin' in the Free World|Neil Young|Freedom|243
+197|Cinnamon Girl|Neil Young|Everybody Knows|167
+198|Like a Hurricane|Neil Young|American Stars|447
+199|Hey Hey, My My|Neil Young|Rust Never Sleeps|231
+200|Southern Man|Neil Young|After the Gold Rush|291
