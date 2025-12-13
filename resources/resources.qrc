@@ -1,0 +1,24 @@
+<RCC>
+	<qresource prefix="/">
+		<file>icons/play.svg</file>
+		<file>icons/pause.svg</file>
+		<file>icons/stop.svg</file>
+		<file>icons/loopOn.svg</file>
+		<file>icons/loopOff.svg</file>
+		<file>icons/nextSong.svg</file>
+		<file>icons/prevSong.svg</file>
+		<file>icons/shuffleOn.svg</file>
+		<file>icons/shuffleOff.svg</file>
+		<file>icons/delete.svg</file>
+		<file>icons/search.svg</file>
+		<file>icons/volumeOn.svg</file>
+		<file>icons/volumeOff.svg</file>
+		<file>icons/add.svg</file>
+		<file>icons/home.svg</file>
+		<file>icons/playlist.svg</file>
+		<file>icons/personal.svg</file>
+		<file>icons/addSong.svg</file>
+		<file>icons/removeSong.svg</file>
+		<file>icons/downArray.svg</file>
+	</qresource>
+</RCC>
