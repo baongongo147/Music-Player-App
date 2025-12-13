@@ -1,0 +1,890 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>850</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Modern Music Player</string>
+  </property>
+  <property name="styleSheet">
+ <string notr="true">
+  /* --- 1. GLOBAL --- */
+  QMainWindow {
+      background-color: #121212; 
+      color: #B3B3B3; 
+      font-family: &quot;Segoe UI&quot;, sans-serif;
+  }
+
+  /* --- 2. SIDEBAR --- */
+  #sidebarFrame {
+      background-color: #000000;
+      border-right: 2px solid #1DB954; 
+  }
+
+  /* --- 3. PLAYER BAR --- */
+  #playerBarFrame {
+      background-color: #181818;
+      border-top: 2px solid #1DB954; 
+  }
+
+  /* --- 4. HEADERS (QUEUE, UP NEXT, LIBRARY) --- */
+  #labelBackQueue, #labelNextQueue, #labelAllSongs {
+      color: #1DB954;            /* Màu xanh lá */
+      font-size: 22px;           /* Kích thước bằng Logo MUSIC PLAYER */
+      font-weight: 900;          /* Độ đậm nhất (Black/Heavy) */
+      text-transform: uppercase; /* Chữ in hoa */
+      letter-spacing: 1px;       /* Khoảng cách chữ */
+      
+      /* Căn chỉnh khoảng cách */
+      margin-bottom: 8px;        /* Cách danh sách bên dưới ra một chút cho thoáng */
+      margin-left: 0px;          /* Bỏ thụt đầu dòng để thẳng tắp với cạnh trái của khung List */
+      padding: 0px;
+  }
+
+  /* Riêng header nhỏ "Quick Search" ở Sidebar thì giữ nguyên hoặc chỉnh nhỏ hơn tùy ý */
+  #labelLibraryHeader {
+      color: #1DB954;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+      margin-left: 5px;
+  }
+
+  /* --- 5. LIST WIDGETS (CARD STYLE) --- */
+  QListWidget {
+      background-color: #1A1A1A; 
+      border: 1px solid #282828; 
+      border-radius: 8px; 
+      outline: none;
+      padding: 5px;
+      font-family: "Segoe UI", sans-serif;
+  }
+  
+  #listAllSongs::item, #listPlayback::item, #listPlayNext::item, #listHistory::item, #listSearchResult::item {
+      min-height: 36px;   
+      max-height: 36px;
+      padding-left: 5px;
+      border-radius: 6px;
+      margin-bottom: 2px;
+  }
+
+  QListWidget::item {
+      color: #B3B3B3;
+  }
+
+  QListWidget::item:hover {
+      background-color: rgba(255, 255, 255, 0.08); 
+  }
+
+  /* KHI ITEM ĐƯỢC CHỌN (SELECTED) */
+  QListWidget::item:selected {
+      background-color: #1DB954; 
+  }
+
+  /* --- LABEL TÊN BÀI HÁT (QUAN TRỌNG) --- */
+  /* Mặc định là TRẮNG */
+  #lblCardTitle {       
+      font-weight: 700;        
+      font-size: 13px;
+      background-color: transparent;
+  } 
+
+  /* Khi Item cha được chọn -> Label con đổi màu XANH */
+  QListWidget::item:selected #lblCardTitle { 
+      color: #FFFFFF;           
+      font-weight: 800; 
+  }
+
+  /* --- 6. INPUTS --- */
+  QLineEdit {
+      background-color: #2A2A2A;
+      color: #FFFFFF;
+      border: 1px solid #2A2A2A;
+      border-radius: 15px;
+      padding: 6px 12px;
+      selection-background-color: #1DB954;
+  }
+  QLineEdit:focus {
+      background-color: #333333;
+      border: 1px solid #1DB954;
+  }
+  QComboBox {
+      background-color: #2A2A2A;
+      color: #FFFFFF;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 8px 12px;
+  }
+  QComboBox::drop-down { border: none; width: 30px; }
+  QComboBox QAbstractItemView {
+      background-color: #2A2A2A;
+      color: #FFFFFF;
+      selection-background-color: #1DB954;
+  }
+
+  /* --- 7. BUTTONS --- */
+  QPushButton { background-color: transparent; border: none; color: #B3B3B3; }
+  #btnNavHome, #btnNavPlaylist, #btnNavPersonal {
+      text-align: left; padding: 8px 15px; font-weight: 700; border-radius: 4px;
+  }
+  #btnNavHome:hover, #btnNavPlaylist:hover, #btnNavPersonal:hover {
+      color: #FFFFFF; background-color: #282828;
+  }
+  #btnAddAlbum, #btnAddNext, #btnDelete, #btnSmart, #btnSearch {
+      background-color: #2A2A2A; border-radius: 12px;
+  }
+  #btnAddAlbum:hover, #btnAddNext:hover, #btnDelete:hover, #btnSmart:hover, #btnSearch:hover {
+      background-color: #1DB954; color: white;
+  }
+
+  /* --- 8. TABS --- */
+  QTabWidget::pane { border: 1px solid #282828; background-color: #181818; border-radius: 6px; }
+  QTabBar::tab {
+      background: #121212; color: #B3B3B3; min-width: 70px; padding: 8px 12px;
+      border-top-left-radius: 4px; border-top-right-radius: 4px; margin-right: 2px;
+  }
+  QTabBar::tab:selected {
+      background: #282828; color: #FFFFFF; border-bottom: 3px solid #1DB954; 
+  }
+
+  /* --- 9. SLIDERS --- */
+  QSlider::groove:horizontal { border: none; height: 4px; background: #404040; border-radius: 2px; }
+  QSlider::sub-page:horizontal { background: #1DB954; border-radius: 2px; }
+  QSlider::handle:horizontal {
+      background: #FFFFFF; width: 10px; height: 10px; margin: -3px 0; border-radius: 5px;
+  }
+  QSlider::handle:horizontal:hover { transform: scale(1.2); }
+
+  /* --- 10. SCROLL BARS (THANH CUỘN) --- */
+  
+  /* Thanh dọc */
+  QScrollBar:vertical {
+      border: none;
+      background-color: #121212; /* Nền tối trùng màu App */
+      width: 10px;               /* Độ rộng vừa phải */
+      margin: 0px;
+  }
+  /* Cục kéo (Handle) dọc */
+  QScrollBar::handle:vertical {
+      background-color: #404040; /* Màu xám nổi hơn nền */
+      min-height: 30px;
+      border-radius: 5px;        /* Bo tròn */
+  }
+  QScrollBar::handle:vertical:hover {
+      background-color: #555555; /* Sáng hơn khi di chuột vào */
+  }
+  /* Ẩn mũi tên lên xuống */
+  QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+      height: 0px;
+  }
+  QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+      background: none;
+  }
+
+  /* Thanh ngang (Cho List Library nếu tên quá dài) */
+  QScrollBar:horizontal {
+      border: none;
+      background-color: #121212;
+      height: 10px;
+      margin: 0px;
+  }
+  QScrollBar::handle:horizontal {
+      background-color: #404040;
+      min-width: 30px;
+      border-radius: 5px;
+  }
+  QScrollBar::handle:horizontal:hover { background-color: #555555; }
+  QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0px; }
+
+  /* --- 11. OTHERS --- */
+  #labelCurrent, #labelDuration { color: #FFFFFF; font-weight: 600; }
+
+  /* --- 12. MESSAGE BOX VÀ DIALOGS --- */
+  QMessageBox {
+      background-color: #202020;
+      border: 2px solid #1DB954; /* Viền xanh lá */
+      border-radius: 10px;
+  }
+  
+  /* Chữ trong hộp thoại */
+  QMessageBox QLabel {
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: "Segoe UI";
+      margin-bottom: 10px;
+  }
+
+  /* NÚT BẤM TRONG HỘP THOẠI (Style Pill-Shape giống Control) */
+  QMessageBox QPushButton {
+      background-color: transparent;    /* Nền trong suốt */
+      border: 1px solid #555;           /* Viền xám mỏng */
+      border-radius: 18px;              /* Bo tròn 18px (Hình viên thuốc) */
+      color: #B3B3B3;                   /* Chữ xám nhạt */
+      padding: 6px 25px;                /* Padding rộng để dễ bấm */
+      font-size: 13px;
+      font-weight: 700;
+      min-width: 80px;                  /* Chiều rộng tối thiểu */
+  }
+
+  /* Hover (Lia chuột vào) */
+  QMessageBox QPushButton:hover {
+      background-color: rgba(255, 255, 255, 0.1); /* Nền sáng mờ */
+      color: #FFFFFF;                             /* Chữ trắng sáng */
+      border: 1px solid #1DB954;                  /* Viền chuyển xanh */
+  }
+
+  /* Pressed (Nhấn xuống) */
+  QMessageBox QPushButton:pressed {
+      background-color: rgba(29, 185, 84, 0.2);   /* Nền xanh nhẹ */
+  }
+ </string>
+</property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainVerticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QWidget" name="bodyWidget" native="true">
+      <layout class="QHBoxLayout" name="bodyLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       
+       <!-- SIDEBAR -->
+       <item>
+        <widget class="QFrame" name="sidebarFrame">
+         <property name="minimumSize">
+          <size>
+           <width>280</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <layout class="QVBoxLayout" name="sidebarLayout">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>15</number>
+          </property>
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <property name="rightMargin">
+           <number>15</number>
+          </property>
+          <property name="bottomMargin">
+           <number>15</number>
+          </property>
+          
+          <item>
+           <widget class="QLabel" name="lblLogo">
+            <property name="styleSheet">
+             <string>color: #1DB954; font-size: 22px; font-weight: 900; margin-bottom: 5px;</string>
+            </property>
+            <property name="text">
+             <string>MUSIC PLAYER</string>
+            </property>
+           </widget>
+          </item>
+          
+          <item>
+           <layout class="QVBoxLayout" name="navLayout">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="btnNavHome">
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">
+                #btnNavHome {
+                  background-image: url(:/icons/home.svg);
+                  background-repeat: no-repeat;
+                  background-position: left center;
+                  padding-left: 30px;
+                }
+               </string>
+              </property>
+              <property name="text">
+               <string>Home</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnNavPlaylist">
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">
+                #btnNavPlaylist {
+                  background-image: url(:/icons/playlist.svg);
+                  background-repeat: no-repeat;
+                  background-position: left center;
+                  padding-left: 30px;
+                }
+               </string>
+              </property>
+              <property name="text">
+               <string>Playlists</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnNavPersonal">
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">
+                #btnNavPersonal {
+                  background-image: url(:/icons/personal.svg);
+                  background-repeat: no-repeat;
+                  background-position: left center;
+                  padding-left: 30px;
+                }
+               </string>
+              </property>
+              <property name="text">
+               <string>Personal</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          
+          <item>
+           <widget class="Line" name="lineSeparator1">
+            <property name="styleSheet">
+             <string>background-color: #282828;</string>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          
+          <!-- QUICK SEARCH -->
+          <item>
+           <widget class="QLabel" name="labelLibraryHeader">
+            <property name="text">
+             <string>Quick Search</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineSearch">
+            <property name="styleSheet">
+             <string notr="true">
+             #lineSearch {
+                  background-image: url(:/icons/search.svg);
+                  background-repeat: no-repeat;
+                  background-position: left center;
+                  padding-left: 30px;
+              }
+              </string>
+            </property>
+            <property name="placeholderText">
+             <string>Search library...</string>
+            </property>
+            <property name="clearButtonEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboSearch">
+            <item>
+             <property name="text">
+              <string>By ID</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>By Title</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>By Artist</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>By Album</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          
+          <!-- LIST SEARCH -->
+          <item>
+           <widget class="QListWidget" name="listSearchResult">
+            <property name="styleSheet">
+             <string>background-color: #202020; border-radius: 5px; color: #ffffff</string>
+            </property>
+           </widget>
+          </item>
+          
+          <!-- TAB TOOLS -->
+          <item>
+           <widget class="QTabWidget" name="tabTools">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>160</height>
+             </size>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="tabManage">
+             <attribute name="title">
+              <string>Tools</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="toolsLayout">
+              <property name="leftMargin"> <number>5</number> </property>
+              <property name="topMargin"> <number>10</number> </property>
+              <property name="rightMargin"> <number>5</number> </property>
+              <property name="bottomMargin"> <number>5</number> </property>
+              <item>
+               <layout class="QHBoxLayout">
+                <item>
+                 <widget class="QLineEdit" name="lineAlbum">
+                  <property name="placeholderText"> <string>Album Name</string> </property>
+                  <property name="clearButtonEnabled"> <bool>true</bool> </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnAddAlbum">
+                  <property name="text"> <string/> </property>
+                  <property name="icon">
+                   <iconset resource="../../resources/resources.qrc">
+                    <normaloff>:/icons/add.svg</normaloff>:/icons/add.svg</iconset>
+                  </property>
+                  <property name="iconSize"> <size> <width>16</width> <height>16</height> </size> </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout">
+                <item>
+                 <widget class="QLineEdit" name="lineIDdelete">
+                  <property name="placeholderText"> <string>ID to Delete</string> </property>
+                  <property name="clearButtonEnabled"> <bool>true</bool> </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnDelete">
+                  <property name="text"> <string/> </property>
+                  <property name="icon">
+                   <iconset resource="../../resources/resources.qrc">
+                    <normaloff>:/icons/delete.svg</normaloff>:/icons/delete.svg</iconset>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tabSmart">
+             <attribute name="title"> <string>Smart</string> </attribute>
+             <layout class="QVBoxLayout">
+              <property name="topMargin"> <number>10</number> </property>
+              <item>
+               <layout class="QHBoxLayout">
+                <item>
+                 <widget class="QLineEdit" name="lineSmartID">
+                  <property name="placeholderText"> <string>Start ID</string> </property>
+                  <property name="clearButtonEnabled"> <bool>true</bool> </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineSmartSize">
+                  <property name="placeholderText"> <string>Size</string> </property>
+                  <property name="clearButtonEnabled"> <bool>true</bool> </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnSmart">
+                <property name="text"> <string>Create Playlist</string> </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tabQuick">
+             <attribute name="title"> <string>Play/Add</string> </attribute>
+             <layout class="QVBoxLayout">
+              <property name="topMargin"> <number>10</number> </property>
+              <item>
+               <widget class="QLineEdit" name="lineSongID">
+                <property name="placeholderText"> <string>Play Song ID</string> </property>
+                <property name="clearButtonEnabled"> <bool>true</bool> </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout">
+                <item>
+                 <widget class="QLineEdit" name="lineNextID">
+                  <property name="placeholderText"> <string>Next ID</string> </property>
+                  <property name="clearButtonEnabled"> <bool>true</bool> </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnAddNext">
+                  <property name="text"> <string/> </property>
+                  <property name="icon">
+                   <iconset resource="../../resources/resources.qrc">
+                    <normaloff>:/icons/add.svg</normaloff>:/icons/add.svg</iconset>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       
+       <!-- CONTENT WIDGET -->
+       <item>
+        <widget class="QWidget" name="contentWidget" native="true">
+         <property name="styleSheet">
+          <string>background-color: #121212;</string>
+         </property>
+         <layout class="QVBoxLayout" name="contentLayout">
+          <property name="leftMargin"> <number>0</number> </property>
+          <property name="topMargin"> <number>0</number> </property>
+          <property name="rightMargin"> <number>0</number> </property>
+          <property name="bottomMargin"> <number>0</number> </property>
+          <item>
+           <widget class="QStackedWidget" name="mainStack">
+            <widget class="QWidget" name="pageHome">
+             <!-- stretch="1,1,1" : Chia tỷ lệ đều -->
+             <layout class="QHBoxLayout" name="homeLayout" stretch="1,1,1">
+              <property name="spacing"> <number>15</number> </property>
+              <property name="leftMargin"> <number>20</number> </property>
+              <property name="topMargin"> <number>20</number> </property>
+              <property name="rightMargin"> <number>20</number> </property>
+              <property name="bottomMargin"> <number>20</number> </property>
+
+              <!-- CỘT 1 -->
+              <item>
+               <layout class="QVBoxLayout" name="layoutPlayback">
+                <item>
+                 <widget class="QLabel" name="labelBackQueue">
+                  <property name="text"> <string>Queue</string> </property>
+                  <property name="alignment"> <set>Qt::AlignCenter</set> </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QListWidget" name="listPlayback">
+                  <!-- QUAN TRỌNG: sizePolicy = Ignored để ép cột bằng nhau -->
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <!-- Bật lại thanh cuộn nhưng ẩn đi bằng CSS cho đẹp, hoặc để AsNeeded -->
+                  <property name="horizontalScrollBarPolicy"> <enum>Qt::ScrollBarAsNeeded</enum> </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+
+              <!-- CỘT 2 -->
+              <item>
+               <layout class="QVBoxLayout" name="layoutNext">
+                <item>
+                 <widget class="QLabel" name="labelNextQueue">
+                  <property name="text"> <string>Up Next</string> </property>
+                  <property name="alignment"> <set>Qt::AlignCenter</set> </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QListWidget" name="listPlayNext">
+                  <!-- QUAN TRỌNG: sizePolicy = Ignored -->
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="horizontalScrollBarPolicy"> <enum>Qt::ScrollBarAsNeeded</enum> </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+
+              <!-- CỘT 3 -->
+              <item>
+               <layout class="QVBoxLayout" name="layoutLibrary">
+                <item>
+                 <widget class="QLabel" name="labelAllSongs">
+                  <property name="text"> <string>All Songs (Library)</string> </property>
+                  <property name="alignment"> <set>Qt::AlignCenter</set> </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QListWidget" name="listAllSongs">
+                  <!-- QUAN TRỌNG: sizePolicy = Ignored -->
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="horizontalScrollBarPolicy"> <enum>Qt::ScrollBarAsNeeded</enum> </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              
+             </layout>
+            </widget>
+
+            <widget class="QWidget" name="pagePlaylist"/>
+            <widget class="QWidget" name="pagePersonal"/>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    
+    <!-- PLAYER BAR -->
+    <item>
+     <widget class="QFrame" name="playerBarFrame">
+      <property name="minimumSize"> <size> <width>0</width> <height>90</height> </size> </property>
+      <property name="maximumSize"> <size> <width>16777215</width> <height>90</height> </size> </property>
+      <property name="frameShape"> <enum>QFrame::NoFrame</enum> </property>
+      <layout class="QHBoxLayout" name="playerLayout">
+       <property name="leftMargin"> <number>20</number> </property>
+       <property name="rightMargin"> <number>20</number> </property>
+       
+       <item>
+        <widget class="QWidget" name="songInfoWidget" native="true">
+         <property name="minimumSize"> <size> <width>220</width> <height>0</height> </size> </property>
+         <layout class="QVBoxLayout">
+          <item>
+           <widget class="QLabel" name="labelCurrent">
+            <property name="font"> <font> <pointsize>11</pointsize> <weight>75</weight> <bold>true</bold> </font> </property>
+            <property name="text"> <string>Ready to Play</string> </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       
+       <item>
+        <widget class="QWidget" name="controlsWidget" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing"> <number>5</number> </property>
+          <property name="topMargin"> <number>5</number> </property>
+          <property name="bottomMargin"> <number>5</number> </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <property name="spacing"> <number>20</number> </property>
+            
+            <item>
+             <widget class="QPushButton" name="btnVolume">
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="toolTip"> <string>Volume</string> </property>
+              <property name="text"> <string/> </property>
+              <property name="icon">
+               <iconset resource="../../resources/resources.qrc">
+                <normaloff>:/icons/volumeOff.svg</normaloff>
+                <normalon>:/icons/volumeOn.svg</normalon>:/icons/volumeOff.svg</iconset>
+              </property>
+              <property name="iconSize"> <size> <width>22</width> <height>22</height> </size> </property>
+              <property name="checkable"> <bool>true</bool> </property>
+              <property name="checked"> <bool>true</bool> </property>
+             </widget>
+            </item>
+            
+            <item>
+             <widget class="QSlider" name="horizontalSlider">
+              <property name="minimumSize"> <size> <width>80</width> <height>0</height> </size> </property>
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="orientation"> <enum>Qt::Horizontal</enum> </property>
+             </widget>
+            </item>
+            
+            <item>
+             <widget class="QPushButton" name="btnShuffle">
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="toolTip"> <string>Shuffle On/Off</string> </property>
+              <property name="text"> <string/> </property>
+              <property name="icon">
+               <iconset resource="../../resources/resources.qrc">
+                <normaloff>:/icons/shuffleOff.svg</normaloff>
+                <normalon>:/icons/shuffleOn.svg</normalon>:/icons/shuffleOff.svg</iconset>
+              </property>
+              <property name="iconSize"> <size> <width>22</width> <height>22</height> </size> </property>
+              <property name="checkable"> <bool>true</bool> </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnPrevious">
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="toolTip"> <string>Previous Song</string> </property>
+              <property name="text"> <string/> </property>
+              <property name="icon">
+               <iconset resource="../../resources/resources.qrc">
+                <normaloff>:/icons/prevSong.svg</normaloff>:/icons/prevSong.svg</iconset>
+              </property>
+              <property name="iconSize"> <size> <width>22</width> <height>22</height> </size> </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnPlayPause">
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="toolTip"> <string>Play/Pause</string> </property>
+              <property name="text"> <string/> </property>
+              <property name="icon">
+               <iconset resource="../../resources/resources.qrc">
+                <normaloff>:/icons/play.svg</normaloff>
+                <normalon>:/icons/pause.svg</normalon>:/icons/play.svg</iconset>
+              </property>
+              <property name="iconSize"> <size> <width>32</width> <height>32</height> </size> </property>
+              <property name="checkable"> <bool>true</bool> </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnNext">
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="toolTip"> <string>Next Song</string> </property>
+              <property name="text"> <string/> </property>
+              <property name="icon">
+               <iconset resource="../../resources/resources.qrc">
+                <normaloff>:/icons/nextSong.svg</normaloff>:/icons/nextSong.svg</iconset>
+              </property>
+              <property name="iconSize"> <size> <width>22</width> <height>22</height> </size> </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnLoop">
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="toolTip"> <string>Loop On/Off</string> </property>
+              <property name="text"> <string/> </property>
+              <property name="icon">
+               <iconset resource="../../resources/resources.qrc">
+                <normaloff>:/icons/loopOff.svg</normaloff>
+                <normalon>:/icons/loopOn.svg</normalon>:/icons/loopOff.svg</iconset>
+              </property>
+              <property name="iconSize"> <size> <width>22</width> <height>22</height> </size> </property>
+              <property name="checkable"> <bool>true</bool> </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnStop">
+              <property name="cursor"> <cursorShape>PointingHandCursor</cursorShape> </property>
+              <property name="toolTip"> <string>Stop Playback</string> </property>
+              <property name="text"> <string/> </property>
+              <property name="icon">
+               <iconset resource="../../resources/resources.qrc">
+                <normaloff>:/icons/stop.svg</normaloff>:/icons/stop.svg</iconset>
+              </property>
+              <property name="iconSize"> <size> <width>22</width> <height>22</height> </size> </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation"> <enum>Qt::Horizontal</enum> </property>
+              <property name="sizeHint" stdset="0"> <size> <width>0</width> <height>0</height> </size> </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout">
+            <item>
+             <widget class="QSlider" name="sliderDuration">
+              <property name="orientation"> <enum>Qt::Horizontal</enum> </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="songDurationWidget" native="true">
+         <property name="minimumSize"> <size> <width>220</width> <height>0</height> </size> </property>
+         <layout class="QHBoxLayout">
+          <item>
+           <widget class="QLabel" name="labelDuration">
+            <property name="font"> <font> <pointsize>11</pointsize> <weight>75</weight> <bold>true</bold> </font> </property>
+            <property name="text"> <string>--:-- / --:--</string> </property>
+            <property name="alignment"> <set>Qt::AlignCenter</set> </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../../resources/resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

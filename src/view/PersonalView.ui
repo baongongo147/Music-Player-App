@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PersonalView</class>
+ <widget class="QWidget" name="PersonalView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1100</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Personal Statistics</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+    QWidget#PersonalView {
+        background-color: #121212;
+        color: #ffffff;
+        font-family: &quot;Segoe UI&quot;, &quot;Arial&quot;, sans-serif;
+    }
+
+    /* --- CARDS (Thẻ thống kê) --- */
+    QFrame#cardToday, QFrame#cardMonth, QFrame#cardTotal {
+        background-color: #1e1e1e;
+        border-radius: 12px;
+        border: 1px solid #282828;
+    }
+    QFrame#cardToday:hover, QFrame#cardMonth:hover, QFrame#cardTotal:hover {
+        background-color: #252525;
+        border: 1px solid #444;
+    }
+
+    /* --- TEXT LABELS (Chữ chung) --- */
+    QLabel { color: #bbbbbb; } /* Tăng độ sáng cho label chung */
+    
+    /* Tiêu đề chính (Recently Played, Top Songs...) */
+    QLabel#lblTitleHistory, QLabel#lblTitleSongs, QLabel#lblTitleArtists {
+        color: #ffffff;
+        font-size: 18px; /* Tăng kích thước */
+        font-weight: bold;
+        margin-bottom: 8px;
+        margin-top: 5px;
+    }
+    
+    /* Tiêu đề nhỏ trong thẻ (Listen Time...) */
+    QLabel#lblHeaderToday, QLabel#lblHeaderMonth, QLabel#lblHeaderTotal {
+        color: #bbbbbb; /* Sáng hơn màu cũ #888 */
+        font-size: 13px;
+        font-weight: bold;
+    }
+    
+    /* Số liệu thống kê to */
+    QLabel#lblStatToday, QLabel#lblStatMonth, QLabel#lblTotalSongs {
+        color: #1DB954; /* Giữ nguyên màu xanh Spotify */
+        font-size: 34px;
+        font-weight: bold;
+    }
+    
+    /* Đơn vị (mins, tracks) */
+    QLabel#lblUnitToday, QLabel#lblUnitMonth, QLabel#lblUnitTotal {
+        color: #888;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    /* --- TABLE (HISTORY) --- */
+    QTableWidget {
+        background-color: #181818;
+        border: 1px solid #282828;
+        border-radius: 8px;
+        outline: none;
+        gridline-color: #282828;
+    }
+    QTableWidget::item {
+        padding: 5px;
+        color: #e0e0e0; /* Chữ trong bảng sáng hơn */
+        border-bottom: 1px solid #222;
+        font-size: 13px;
+    }
+    QTableWidget::item:hover {
+        background-color: #282828;
+    }
+    
+    /* Header (Tiêu đề cột: Title, Artist...) - QUAN TRỌNG */
+    QHeaderView::section {
+        background-color: #202020; /* Nền header sáng hơn nền bảng 1 chút */
+        color: #ffffff;            /* Chữ màu trắng hoàn toàn cho rõ */
+        padding: 6px;
+        border: none;
+        border-bottom: 2px solid #333; /* Đường kẻ dưới chân header */
+        font-weight: bold;
+        font-size: 13px;          /* Chữ to hơn */
+    }
+    QTableCornerButton::section {
+        background-color: #202020;
+        border: none;
+    }
+
+    /* --- LISTS (Top Songs/Artists) --- */
+    QListWidget {
+        background-color: #181818;
+        border-radius: 8px;
+        border: 1px solid #282828;
+        outline: none;
+    }
+    QListWidget::item {
+        padding: 10px;
+        color: #e0e0e0; /* Chữ sáng hơn */
+        border-bottom: 1px solid #222;
+        font-size: 13px;
+    }
+    QListWidget::item:hover {
+        background-color: #282828;
+        color: #ffffff;
+    }
+    QListWidget::item:selected {
+        background-color: #333;
+        color: #1DB954;
+        border-left: 3px solid #1DB954; /* Điểm nhấn khi chọn */
+    }
+
+    /* --- SCROLLBARS --- */
+    QScrollBar:vertical {
+        border: none;
+        background: #121212;
+        width: 10px;
+        margin: 0;
+    }
+    QScrollBar::handle:vertical {
+        background: #404040;
+        min-height: 30px;
+        border-radius: 5px;
+    }
+    QScrollBar::handle:vertical:hover {
+        background: #1DB954;
+    }
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+        height: 0px;
+    }
+   </string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>25</number>
+   </property>
+   <property name="leftMargin">
+    <number>30</number>
+   </property>
+   <property name="topMargin">
+    <number>30</number>
+   </property>
+   <property name="rightMargin">
+    <number>30</number>
+   </property>
+   <property name="bottomMargin">
+    <number>30</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="statsLayout">
+     <property name="spacing">
+      <number>20</number>
+     </property>
+     <item>
+      <widget class="QFrame" name="cardToday">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>20</number>
+        </property>
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <property name="bottomMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="lblHeaderToday">
+          <property name="text">
+           <string>Listen Time (Today)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="lblStatToday">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblUnitToday">
+            <property name="text">
+             <string>mins</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="cardMonth">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="leftMargin">
+         <number>20</number>
+        </property>
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <property name="bottomMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="lblHeaderMonth">
+          <property name="text">
+           <string>Listen Time (Month)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="lblStatMonth">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblUnitMonth">
+            <property name="text">
+             <string>mins</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="cardTotal">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="leftMargin">
+         <number>20</number>
+        </property>
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <property name="bottomMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="lblHeaderTotal">
+          <property name="text">
+           <string>Total Songs Played</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="lblTotalSongs">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblUnitTotal">
+            <property name="text">
+             <string>tracks</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="contentLayout">
+     <property name="spacing">
+      <number>25</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="historyLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblTitleHistory">
+         <property name="text">
+          <string>Recently Played</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="tableHistory">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="showDropIndicator" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="dragDropOverwriteMode">
+          <bool>false</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="showGrid">
+          <bool>false</bool>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+         <property name="cornerButtonEnabled">
+          <bool>false</bool>
+         </property>
+         <attribute name="horizontalHeaderVisible">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="horizontalHeaderHighlightSections">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Title</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Artist</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Time</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="topsLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblTitleSongs">
+         <property name="text">
+          <string>Top Songs</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="listTopSongs">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblTitleArtists">
+         <property name="text">
+          <string>Top Artists</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="listTopArtists">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

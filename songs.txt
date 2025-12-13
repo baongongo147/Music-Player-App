@@ -1,0 +1,15 @@
+1|Attention|Charlie Puth|Voicenotes|media/Attention.mp3
+2|Dangerously|Charlie Puth|Nine Track Mind|media/Dangerously.mp3
+3|Haru Haru|Big Bang|Stand Up|media/haru_haru.mp3
+4|Lemon|Kenshi Yonezu|Unknown|media/Lemon.mp3
+5|Lemon Tree|Fools Garden|Dish of the Day|media/Lemon_Tree.mp3
+6|Rolling In The Deep|Adele|21|media/Rolling_In_The_Deep.mp3
+7|See You Again|Charlie Puth|Nine Track Mind|media/See_You_Again.mp3
+8|Set Fire To The Rain|Adele|21|media/Set_Fire_To_The_Rain.mp3
+9|Shape of You|Ed Sheeran|Divide|media/shape_of_you.mp3
+10|Skyfall|Adele|Unknown|media/Skyfall.mp3
+11|Someone Like You|Adele|21|media/Someone_Like_You.mp3
+12|The Nights|Avicii|The Day - Nights|media/The_Nights.mp3
+13|Waiting for Love|Avicii|Stories|media/Waiting_For_Love.mp3
+14|We Don't Talk Anymore|Charlie Puth|Nine Track Mind|media/We_Don't_Talk_Anymore.mp3
+15|Yummy|Justin Bieber|Changes|media/Yummy.mp3
