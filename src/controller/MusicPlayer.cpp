@@ -165,41 +165,56 @@ namespace controller{
 	}
 
 	// Hàm lưu session
-	void MusicPlayer::saveSession(const QString& filename) {
+	void MusicPlayer::saveSession(int currentPlayingID, int lastQueueID, bool isFromNext, const QString& filename) {
 		QJsonObject root;
 		
-		// 1. Lưu Playback Queue
+		// 1. Lưu Playback Queue (Danh sách chính)
 		QJsonArray playbackArray;
 		for(const auto& s : playBack.getQueue()) {
 			playbackArray.append(s.id); 
 		}
 		root["playbackQueue"] = playbackArray;
 
-		// 2. Lưu History
+		// 2. Lưu Play Next Queue (Danh sách ưu tiên)
+		QJsonArray playNextArray;
+		for(const auto& s : playNext.getNextQueue()) {
+			playNextArray.append(s.id);
+		}
+		root["playNext"] = playNextArray;
+
+		// 3. Lưu History
 		QJsonArray historyArray;
 		for(const auto& s : history.getHistory()) {
 			historyArray.append(s.id);
 		}
 		root["history"] = historyArray;
 
-		// 3. Lưu Current Song ID
+		// 4. [QUAN TRỌNG] Lưu 2 trạng thái riêng biệt
+		
+		// A. Lưu bài thực sự đang hát (để hiển thị UI)
+		root["actualPlayingID"] = currentPlayingID;
+
+		// B. Lưu con trỏ của Playback Queue (để resume sau khi hết PlayNext)
 		try {
 			if (!playBack.empty()) {
-				root["currentSongID"] = playBack.getCurrentSong().id;
+				// Lấy bài mà iterator đang trỏ tới trong danh sách chính
+				root["playbackCursorID"] = playBack.getCurrentSong().id;
 			} else {
-				root["currentSongID"] = -1;
+				root["playbackCursorID"] = -1;
 			}
 		} catch (...) {
-			root["currentSongID"] = -1;
+			root["playbackCursorID"] = -1;
 		}
 
-		// 4. Lưu volume
+		// 5. Lưu volume & Playlist (Giữ nguyên)
 		root["volume"] = m_volume;
+		root["customPlaylists"] = playlistLib.toJson();
 
-		// 5. Lưu Playlist: Gọi hàm toJson của library để lấy mảng playlist và lưu vào root
-        root["customPlaylists"] = playlistLib.toJson();
+		// 6. Lưu trạng thái Logic của Mainwindow
+		root["lastPlayedQueueID"] = lastQueueID;
+    	root["isPlayingFromPlayNext"] = isFromNext;
 
-		// Ghi ra file
+		// Ghi file
 		QFile file(filename);
 		if (file.open(QIODevice::WriteOnly)) {
 			QJsonDocument doc(root);
@@ -217,58 +232,57 @@ namespace controller{
 		QJsonDocument doc = QJsonDocument::fromJson(data);
 		QJsonObject root = doc.object();
 
-		// 1. Khôi phục Playback Queue
+		// 1. Khôi phục Playback Queue (Code cũ giữ nguyên) ...
 		if (root.contains("playbackQueue")) {
+			playBack.clear(); 
 			QJsonArray arr = root["playbackQueue"].toArray();
 			for (const auto& val : arr) {
-				int id = val.toInt();
-				
-				// --- DÙNG HÀM CỦA BẠN: findSongByID ---
-				models::Song* sPtr = library.findSongByID(id); 
-				
-				if (sPtr != nullptr) { // Kiểm tra tìm thấy không
-					// Dùng *sPtr để lấy giá trị Song truyền vào addSong
-					playBack.addSong(*sPtr); 
-				}
+				models::Song* sPtr = library.findSongByID(val.toInt()); 
+				if (sPtr) playBack.addSong(*sPtr); 
 			}
 		}
 
-		// 2. Khôi phục History
-		if (root.contains("history")) {
-			QJsonArray arr = root["history"].toArray();
+		// 2. Khôi phục Play Next (Code cũ giữ nguyên) ...
+		if (root.contains("playNext")) {
+			playNext.clear(); 
+			QJsonArray arr = root["playNext"].toArray();
 			for (const auto& val : arr) {
-				int id = val.toInt();
-				
-				// --- DÙNG HÀM CỦA BẠN: findSongByID ---
-				models::Song* sPtr = library.findSongByID(id);
-				
-				if (sPtr != nullptr) {
-					// Dùng *sPtr để lấy giá trị Song truyền vào push
-					history.push(*sPtr); 
-				}
-			}
-		}
-		
-		// 3. Khôi phục Current Song (Giữ nguyên)
-		if (root.contains("currentSongID")) {
-			int currentID = root["currentSongID"].toInt();
-			if (currentID != -1) {
-				playBack.setCurrentSongByID(currentID);
+				models::Song* sPtr = library.findSongByID(val.toInt()); 
+				if (sPtr) playNext.addSong(*sPtr); 
 			}
 		}
 
-		// 4. Khôi phục volume
-		if (root.contains("volume")) {
-			m_volume = root["volume"].toInt();
+		// 3. Khôi phục History ... (Giữ nguyên)
+
+		// 4. Khôi phục trạng thái Logic
+		if (root.contains("lastPlayedQueueID")) {
+			m_restoredLastQueueID = root["lastPlayedQueueID"].toInt();
+		} else {
+			m_restoredLastQueueID = -1;
 		}
 
-		// 5.Khôi phục playlists
-        if (root.contains("customPlaylists")) {
-            QJsonArray plArray = root["customPlaylists"].toArray();
-            // Nạp dữ liệu vào PlaylistLibrary
-            // Hàm này sẽ xóa playlist mặc định và thay bằng danh sách trong file
-            playlistLib.fromJson(plArray); 
-        }
+		if (root.contains("isPlayingFromPlayNext")) {
+			m_restoredIsFromNext = root["isPlayingFromPlayNext"].toBool();
+		} else {
+			m_restoredIsFromNext = false;
+		}
+
+		// 5. [QUAN TRỌNG] Khôi phục Con trỏ Playback (Resume Cursor)
+		// Mục đích: Để PlaybackQueue biết nó đang đứng ở đâu, 
+		// dù bài đó có đang hát hay không.
+		if (root.contains("playbackCursorID")) {
+			int cursorID = root["playbackCursorID"].toInt();
+			if (cursorID != -1) {
+				try {
+					// Set iterator về đúng bài cũ
+					playBack.setCurrentSongByID(cursorID);
+				} catch (...) {}
+			}
+		}
+
+		// Các phần khác (Volume, Custom Playlist) giữ nguyên ...
+		if (root.contains("volume")) m_volume = root["volume"].toInt();
+		if (root.contains("customPlaylists")) playlistLib.fromJson(root["customPlaylists"].toArray());
 	}
 
 	/** Hàm tìm kiếm:
@@ -484,4 +498,12 @@ namespace controller{
             return models::Song(); 
         }
     }
+	
+	bool MusicPlayer::checkPlaylistExists(const QString& name) const {
+		return playlistLib.exists(name);
+	}
+
+	bool MusicPlayer::deletePlaylist(const QString& name) {
+		return playlistLib.removePlaylist(name);
+	}
 }

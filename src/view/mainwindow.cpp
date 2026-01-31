@@ -20,146 +20,80 @@ static QString formatTime(qint64 ms) {
 // -------------------------------------------------------------
 MainWindow::MainWindow(const std::string& songFile, QWidget *parent)
     : QMainWindow(parent),
-      ui(new Ui::MainWindow), // Khởi tạo giao diện
+      ui(new Ui::MainWindow),
       player(songFile),
       media(new QMediaPlayer(this)),
-	  isLoopenabled(false), // Khởi tạo mặc định là Không LOOP
-      m_lastVolume(50), // Âm lượng mặc định là 50%
-	  m_isMuted(false) // Mặc định là có tiếng
+      // 1. KHỞI TẠO MẶC ĐỊNH 
+      isLoopenabled(false),           // Mặc định tắt loop
+      m_lastVolume(50),               // Mặc định vol 50
+      m_isMuted(false),               
+      m_isPlayingFromPlayNext(false), // Mặc định không phải từ Next
+      m_lastPlayedQueueID(-1),        // Mặc định chưa hát bài nào
+      m_currentSongID(-1)             // Mặc định không có bài đang chọn
 {
-	// Vẽ giao diện từ Designer lên cửa sổ
+    // 2. SETUP UI CƠ BẢN
     ui->setupUi(this); 
-
-    // --- THÊM ĐOẠN NÀY ĐỂ CHIA 3 CỘT ĐỀU NHAU ---
-    // setStretch(index, factor) -> index 0, 1, 2 đều có tỷ lệ 1
     ui->homeLayout->setStretch(0, 1);
     ui->homeLayout->setStretch(1, 1);
     ui->homeLayout->setStretch(2, 1);
+    ui->horizontalSlider->setRange(0, 100);
+    ui->horizontalSlider->setValue(50);
 
-	// --- CẤU HÌNH STACKED WIDGET (SIDEBAR) ---
+    // 3. SETUP SIDEBAR & PAGES
+    m_playlistView = new PlaylistView(&player, this);
+    m_personalView = new PersonalView(&player, &statsManager, this);
     
-    // 1. Khởi tạo các trang con
-    m_playlistView = new PlaylistView(&player,this);
-    m_personalView = new PersonalView(&player, &statsManager, this); // Truyền &player vào để lấy thống kê
-
-    // 2. Thêm vào StackedWidget (vào chỗ pagePlaylist và pagePersonal đã khai báo trong XML)
-    // Lưu ý: ui->mainStack đã có sẵn pageHome (index 0), pagePlaylist (index 1), pagePersonal (index 2)
-    // Ta thay thế widget placeholder bằng widget thật của ta
-    
-    // Xóa widget rỗng cũ trong XML đi
     ui->mainStack->removeWidget(ui->pagePlaylist);
     ui->mainStack->removeWidget(ui->pagePersonal);
-
-    // Thêm widget code tay vào
-    ui->mainStack->addWidget(m_playlistView); // Index 1
-    ui->mainStack->addWidget(m_personalView); // Index 2
-
-    // 3. Kết nối nút bấm Sidebar với Stack
-    connect(ui->btnNavHome, &QPushButton::clicked, [this](){
-        ui->mainStack->setCurrentIndex(0); // Về trang Home
-    });
-
-    connect(ui->btnNavPlaylist, &QPushButton::clicked, [this](){
-        ui->mainStack->setCurrentIndex(1); // Sang Playlist
-    });
-
-    connect(ui->btnNavPersonal, &QPushButton::clicked, [this](){
-        m_personalView->refreshData(); // Cập nhật số liệu mới nhất
-        ui->mainStack->setCurrentIndex(2); // Sang Personal
-    });
-
-    // Mặc định vào Home
+    ui->mainStack->addWidget(m_playlistView);
+    ui->mainStack->addWidget(m_personalView);
     ui->mainStack->setCurrentIndex(0);
 
-
-
-
-
-	// chức năng âm lượng
-    ui->horizontalSlider->setRange(0, 100);
-
-    // Khi bấm nút Loa -> Gọi hàm on_btnVolume_clicked
+    // 4. SETUP KẾT NỐI (CONNECTIONS)
+    connect(ui->btnNavHome, &QPushButton::clicked, [this](){ ui->mainStack->setCurrentIndex(0); });
+    connect(ui->btnNavPlaylist, &QPushButton::clicked, [this](){ ui->mainStack->setCurrentIndex(1); });
+    connect(ui->btnNavPersonal, &QPushButton::clicked, [this](){ m_personalView->refreshData(); ui->mainStack->setCurrentIndex(2); });
+    
     connect(ui->btnVolume, &QPushButton::clicked, this, &MainWindow::on_btnVolume_clicked);
-
-    // Load dữ liệu bài hát vào listPlayback
-    loadLibraryToUI();
-
-	// Đặt giá trị mặc định (ví dụ 50%)
-    ui->horizontalSlider->setValue(50);
-    if(media) {
-        media->setVolume(50); 
-    }
-
-    // KẾT NỐI TÍN HIỆU (Signal) & KHE (Slot)
-    // Cú pháp: connect(ui->Tên_Widget_Trong_Designer, ...)
-
-    // Nút Next / Previous / Shuffle
+    connect(ui->horizontalSlider, &QSlider::valueChanged, this, &MainWindow::handleVolumeChanged);
+    
     connect(ui->btnNext, &QPushButton::clicked, this, &MainWindow::handleNext);
     connect(ui->btnPrevious, &QPushButton::clicked, this, &MainWindow::handlePrev);
     connect(ui->btnShuffle, &QPushButton::clicked, this, &MainWindow::handleShuffle);
-
-    // Nút Play by ID (Nhập ID rồi bấm Play)
-    // connect(ui->btnPlayID, &QPushButton::clicked, this, &MainWindow::handlePlayByID);
-
-    // Nút Smart Playlist (Nhập ID, Size rồi bấm Create)
+    connect(ui->btnPlayPause, &QPushButton::clicked, this, &MainWindow::handlePlayPause);
+    connect(ui->btnStop, &QPushButton::clicked, this, &MainWindow::handleStop);
+    connect(ui->btnLoop, &QPushButton::clicked, this, &MainWindow::handleLoopToggle);
+    
     connect(ui->btnSmart, &QPushButton::clicked, this, &MainWindow::handleSmartPlaylist);
-
-    // Sự kiện click đúp vào bài hát trong listPlayback
-    connect(ui->listPlayback, &QListWidget::itemDoubleClicked, this, &MainWindow::handleSongDoubleClick);
-
-    // Sự kiện click đúp vào bài hát trong listSearchResult,listAllSongs
-    connect(ui->listSearchResult, &QListWidget::itemDoubleClicked, this, &MainWindow::handleSongDoubleClick);
-
-	// Sự kiện click đúp vào All Songs Library (Danh sách thư viện)
-    // Lưu ý: ui->listAllSongs là tên widget ta đã thêm trong file XML ở bước trước
-    connect(ui->listAllSongs, &QListWidget::itemDoubleClicked, this, &MainWindow::handleLibraryDoubleClick);
-
-	// Kết nối tín hiệu kéo thanh trượt với hàm xử lý
-    connect(ui->horizontalSlider, &QSlider::valueChanged, this, &MainWindow::handleVolumeChanged);
-
-	// Kết nối Slider Duration
-    // 1. Khi độ dài bài hát thay đổi -> Set Range cho slider
-    connect(media, &QMediaPlayer::durationChanged, this, &MainWindow::handleDurationChanged);
-    // 2. Khi bài hát đang chạy (mỗi giây) -> Cập nhật vị trí slider tự động
-    connect(media, &QMediaPlayer::positionChanged, this, &MainWindow::handlePositionChanged);
-	// 3. Khi người dùng kéo slider -> tua nhạc (seek)
-	// sliderMoved: Gọi khi đang kéo (để tua mượt mà)
-    connect(ui->sliderDuration, &QSlider::sliderMoved, this, &MainWindow::handleSeek);
-    // sliderReleased: Gọi khi thả chuột ra (để chốt vị trí cuối cùng)
-    connect(ui->sliderDuration, &QSlider::sliderReleased, [this]() {
-        handleSeek(ui->sliderDuration->value());
-    });
-
-    // Xử lý khi click đúp vào kết quả tìm kiếm (để phát nhạc)
-    connect(ui->listSearchResult, &QListWidget::itemDoubleClicked, this, &MainWindow::handleSongDoubleClick);
-    // Kết nối sự kiện thay đổi text với hàm xử lý tìm kiếm
     connect(ui->lineSearch, &QLineEdit::textChanged, this, &MainWindow::handleSearch);
     
-    // Kết nối cho nút Delete 
-    connect(ui->btnDelete, &QPushButton::clicked, this, &MainWindow::handleDeleteFromQueue);
-    // Nếu đang gõ trong ô ID Delete mà ấn Enter thì cũng xóa luôn
-    connect(ui->lineIDdelete, &QLineEdit::returnPressed, this, &MainWindow::handleDeleteFromQueue);
-
-	// Nút Play/Pause
-	connect(ui->btnPlayPause, &QPushButton::clicked, this, &MainWindow::handlePlayPause);
-	connect(ui->btnStop, &QPushButton::clicked, this, &MainWindow::handleStop);
-
-	// GIẢI QUYẾT VẤN ĐỀ ĐỒNG BỘ NÚT BẤM (Cho Double Click, Next, Prev...)
-    // Khi trạng thái media thay đổi (Playing <-> Stopped), tự động đổi chữ trên nút
+    // Double click events
+    connect(ui->listPlayback, &QListWidget::itemDoubleClicked, this, &MainWindow::handleSongDoubleClick);
+    connect(ui->listSearchResult, &QListWidget::itemDoubleClicked, this, &MainWindow::handleSongDoubleClick);
+    connect(ui->listAllSongs, &QListWidget::itemDoubleClicked, this, &MainWindow::handleLibraryDoubleClick);
+    
+    // Media events
+    connect(media, &QMediaPlayer::durationChanged, this, &MainWindow::handleDurationChanged);
+    connect(media, &QMediaPlayer::positionChanged, this, &MainWindow::handlePositionChanged);
     connect(media, &QMediaPlayer::stateChanged, this, &MainWindow::onMediaStateChanged);
-
-	// Kết nối cho nút loop
-    connect(ui->btnLoop, &QPushButton::clicked, this, &MainWindow::handleLoopToggle);
- 
-    // Xử lý sự kiện khi bài hát kết thúc
     connect(media, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::onMediaStatusChanged);
-
-	// Kết nối tín hiệu từ Playlist View
+    connect(ui->sliderDuration, &QSlider::sliderMoved, this, &MainWindow::handleSeek);
+    connect(ui->sliderDuration, &QSlider::sliderReleased, [this]() { handleSeek(ui->sliderDuration->value()); });
+    
     connect(m_playlistView, &PlaylistView::playlistClicked, this, &MainWindow::handlePlaylistSelected);
 
-    // --- LOGIC KHÔI PHỤC SESSION ---
+    // 5. LOAD DỮ LIỆU CƠ BẢN (LIBRARY)
+    // Luôn load thư viện gốc trước, dù có restore hay không
+    loadLibraryToUI(); 
+    if(media) media->setVolume(50); // Set âm lượng phần cứng mặc định
+
+    // ==========================================================
+    // 6. LOGIC RESTORE SESSION (XỬ LÝ CUỐI CÙNG)
+    // ==========================================================
     QFile sessionFile("session.json");
     if (sessionFile.exists()) {
+        // Dùng hàm showCustomDialog không tiện ở đây vì ta cần lấy kết quả Yes/No
+        // Nên dùng lại code tạo MessageBox thủ công nhưng dùng style đẹp
         QMessageBox msgBox(this);
         msgBox.setWindowTitle("Restore Session");
         msgBox.setText("Do you want to continue from the last session?");
@@ -167,72 +101,80 @@ MainWindow::MainWindow(const std::string& songFile, QWidget *parent)
         msgBox.setDefaultButton(QMessageBox::Yes);
         msgBox.setIcon(QMessageBox::Question);
 
-        // 2. Ép Style Dark Mode, Viền Xanh, Nút To
+        // Copy Style đẹp vào đây
         msgBox.setStyleSheet(
-            "QMessageBox {"
-            "   background-color: #202020;"  /* Nền tối (sáng hơn nền app 1 xíu để nổi bật) */
-            "   border: 2px solid #1DB954;"   /* VIỀN XANH LÁ RÕ RÀNG */
-            "   border-radius: 10px;"         /* Bo tròn góc */
-            "}"
-            "QLabel {"
-            "   color: #FFFFFF;"              /* Chữ trắng */
-            "   font-size: 14px;"             /* Chữ to hơn mặc định */
-            "   font-weight: 500;"
-            "   font-family: 'Segoe UI';"
-            "   margin-bottom: 10px;"         /* Dãn cách giữa chữ và nút */
-            "   margin-right: 15px;"          /* Dãn cách icon và chữ */
-            "}"
-            "QPushButton {"
-            "   background-color: #333333;"   /* Nền nút xám */
-            "   color: white;"
-            "   border: 1px solid #444;"
-            "   border-radius: 6px;"
-            "   padding: 8px 25px;"           /* NÚT TO, DÃN CÁCH RỘNG */
-            "   font-size: 13px;"
-            "   min-width: 80px;"             /* Chiều rộng tối thiểu cho đẹp */
-            "}"
-            "QPushButton:hover {"
-            "   background-color: #1DB954;"   /* Hover vào thành màu xanh */
-            "   color: black;"                /* Chữ chuyển đen cho dễ đọc */
-            "   border: none;"
-            "}"
-            "QPushButton:pressed {"
-            "   background-color: #1ed760;"
-            "}"
+            "QMessageBox { background-color: #202020; border: 2px solid #1DB954; border-radius: 10px; }"
+            "QLabel { color: #FFFFFF; font-size: 14px; font-weight: 500; font-family: 'Segoe UI'; margin: 10px 15px; }"
+            "QPushButton { background-color: #333333; color: white; border: 1px solid #444; border-radius: 6px; padding: 6px 25px; min-width: 80px; }"
+            "QPushButton:hover { background-color: #1DB954; color: black; border: none; }"
         );
 
-        // 3. Hiện hộp thoại và lấy kết quả
         int reply = msgBox.exec();
         
         if (reply == QMessageBox::Yes) {
-            // Thực hiện load lại dữ liệu
-            player.restoreSession();
+            // --- A. NGƯỜI DÙNG CHỌN RESTORE ---
             
-            // Vẽ lại giao diện sau khi load dữ liệu ngầm
+            // 1. Load dữ liệu từ file vào Backend
+            player.restoreSession(); 
+
+            // 2. Cập nhật các biến Logic Frontend (QUAN TRỌNG)
+            // Lấy giá trị từ Backend đắp vào biến của MainWindow
+            m_lastPlayedQueueID = player.getRestoredLastQueueID();
+            m_isPlayingFromPlayNext = player.getRestoredIsFromNext();
+
+            // 3. Vẽ lại giao diện
             refreshPlaybackQueueUI(); 
             refreshHistoryUI();
-			m_playlistView->loadPlaylists();
-            
-			// khôi phục volume
-            int savedVol = player.getVolume();
-            ui->horizontalSlider->setValue(savedVol); // Set vị trí thanh trượt
-            if(media) media->setVolume(savedVol); // Set âm lượng thực tế
+            refreshPlayNextUI(); 
+            m_playlistView->loadPlaylists();
 
-            // Cập nhật bài đang hát lên Label
-            try {
-                auto current = player.getPlayBack().getCurrentSong();
-                updateNowPlaying(current);
-                // Nếu muốn auto play luôn thì gọi: media->play();
-            } catch(...) {}
+            // 4. Khôi phục Volume
+            int savedVol = player.getVolume();
+            m_lastVolume = savedVol; // Cập nhật biến nhớ volume
+            ui->horizontalSlider->setValue(savedVol); 
+            if(media) media->setVolume(savedVol); 
+
+            // 5. Khôi phục bài đang hát dở (Hiển thị UI thôi, không auto play)
+            // Đọc lại file JSON để lấy "actualPlayingID" 
+            QFile file("session.json");
+            if (file.open(QIODevice::ReadOnly)) {
+                QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+                QJsonObject root = doc.object();
+                
+                int playingID = -1;
+                if (root.contains("actualPlayingID")) playingID = root["actualPlayingID"].toInt();
+                
+                if (playingID != -1) {
+                    models::Song* sPtr = player.getLibrary().findSongByID(playingID);
+                    if (sPtr) {
+                        m_currentSongID = sPtr->id; // Cập nhật biến nhớ ID
+                        m_currentSongTitle = QString::fromStdString(sPtr->title);
+                        
+                        // Hiển thị trạng thái Stopped
+                        ui->labelCurrent->setText("Stopped: " + m_currentSongTitle);
+                        
+                        // Nạp file sẵn sàng
+                        QString qpath = QString::fromStdString(sPtr->filePath);
+                        media->setMedia(QUrl::fromLocalFile(qpath));
+                    }
+                }
+                file.close();
+            }
+
         } else {
-            // Nếu chọn No -> Xóa file session cũ đi để làm mới
-            sessionFile.remove();
-			player.setVolume(50);
+            // --- B. NGƯỜI DÙNG CHỌN NO (RESET) ---
+            sessionFile.remove(); // Xóa file save cũ
+            
+            // Các biến đã được khởi tạo mặc định ở bước 1 (Initializer List) 
+            // nên không cần làm gì thêm, chỉ cần đảm bảo volume về chuẩn.
+            player.setVolume(50);
+            if(media) media->setVolume(50);
         }
     } else {
-		// Nếu không có file session, set mặc định 50 vào player
+        // --- C. KHÔNG CÓ FILE SESSION ---
+        // Chạy mặc định như mới
         player.setVolume(50);
-	}
+    }
 }
 
 MainWindow::~MainWindow()
@@ -265,7 +207,7 @@ void MainWindow::loadLibraryToUI() {
         layout->setSpacing(10);
 
         // 4. Label Tên bài hát
-        QString text = QString::number(s.id) + " - " + QString::fromStdString(s.title);
+        QString text = QString::number(s.id) + " - " + QString::fromStdString(s.title) + " - " + QString::fromStdString(s.artist);;
         QLabel* lblName = new QLabel(text);
         lblName->setObjectName("lblCardTitle"); 
         lblName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred); 
@@ -281,7 +223,6 @@ void MainWindow::loadLibraryToUI() {
         btnAdd->setStyleSheet(
             "QPushButton { border: none; background: transparent; border-radius: 13px; }"
             "QPushButton:hover { background-color: #1DB954; }"
-            // "QPushButton:pressed { background-color: #1ed760; }" ////////////////////////////////////////////////////////////////
         );
 
         // Kết nối nút bấm
@@ -316,10 +257,9 @@ void MainWindow::refreshPlaybackQueueUI() {
         layout->setContentsMargins(5, 0, 0, 0); 
         layout->setSpacing(10);
 
-        QString displayText = QString::number(index) + " - " + QString::fromStdString(s.title);
+        QString displayText = QString::number(index) + " - " + QString::fromStdString(s.title) + " - " + QString::fromStdString(s.artist);
         QLabel* lblName = new QLabel(displayText);
 
-        // [QUAN TRỌNG]
         lblName->setObjectName("lblCardTitle"); 
         
         lblName->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred); 
@@ -357,60 +297,84 @@ void MainWindow::playAudioFile(const std::string& path) {
 // LOGIC: UPDATE UI (LABEL)
 // -------------------------------------------------------------
 void MainWindow::updateNowPlaying(const models::Song& s) {
+	m_currentSongID = s.id;
+
     m_currentSongTitle = QString::fromStdString(s.title);
     ui->labelCurrent->setText("Current Song: " + m_currentSongTitle);
     playAudioFile(s.filePath);
 }
 
 // -------------------------------------------------------------
-// EVENT: PLAY BY ID
-// -------------------------------------------------------------
-void MainWindow::handlePlayByID() {
-    // Lấy text từ ô nhập lineSongID
-    QString textID = ui->lineSongID->text();
-    bool ok;
-    int id = textID.toInt(&ok);
-
-    if (!ok) {
-        showCustomDialog("Input Error", "Please enter a valid Song ID (number).", QMessageBox::Warning);
-        return;
-    }
-
-    try {
-        player.selectAndPlaySong(id);
-        auto current = player.getPlayBack().getCurrentSong();
-        updateNowPlaying(current);
-		refreshUI();
-    } catch (...) {
-        showCustomDialog("Error", "Song ID not found!", QMessageBox::Warning);
-    }
-}
-
-// -------------------------------------------------------------
 // EVENT: NEXT
 // -------------------------------------------------------------
 void MainWindow::handleNext() {
-    models::Song s = player.playNextSongLogic();
+    // 1. ƯU TIÊN UP NEXT
+    if (!player.getPlayNext().empty()) {
+        auto nextQueue = player.getPlayNext().getNextQueue();
+        models::Song s = nextQueue.front();
+        player.getPlayNext().popNextSong();
+        refreshPlayNextUI();
 
-    if (s.id != 0) {
-        // Có bài -> Phát
-        // Log thống kê bài cũ TRƯỚC KHI phát bài mới
-        logCurrentSongListening(); 
+        // Setup trạng thái
+        m_isPlayingFromPlayNext = true; 
+
+        logCurrentSongListening();
         songStartTime = QTime::currentTime();
-
         updateNowPlaying(s);
-        refreshPlayNextUI();      // Cập nhật nếu vừa pop PlayNext
-        refreshPlaybackQueueUI(); // Cập nhật nếu vừa playNext main queue
         
-        qDebug() << "Playing: " << QString::fromStdString(s.title);
+        qDebug() << "Playing from UP NEXT:" << QString::fromStdString(s.title);
+        return;
+    }
+
+    // 2. PLAYBACK QUEUE (MAIN)
+    if (!player.getPlayBack().empty()) {
+        try {
+            auto currentIteratorSong = player.getPlayBack().getCurrentSong();
+
+            // Nếu bài Iterator đang trỏ tới (currentIteratorSong.id)
+            // TRÙNG với bài cuối cùng từng hát ở Queue (m_lastPlayedQueueID)
+            // -> Nghĩa là bài này hát rồi -> Phải Next (+1)
+            if (currentIteratorSong.id == m_lastPlayedQueueID) {
+                player.playSong(); // Iterator++
+                currentIteratorSong = player.getPlayBack().getCurrentSong();
+				qDebug() << "Skipping played song. Next is:" << QString::fromStdString(currentIteratorSong.title);
+            } else {
+				qDebug() << "Resume/Start at iterator:" << QString::fromStdString(currentIteratorSong.title);
+			}
+
+            // Setup trạng thái
+            m_isPlayingFromPlayNext = false;
+
+			// Cập nhật biến nhớ: "Đây là bài Main Queue mới nhất đã hát"
+            m_lastPlayedQueueID = currentIteratorSong.id;
+
+            logCurrentSongListening();
+            songStartTime = QTime::currentTime();
+            updateNowPlaying(currentIteratorSong);
+            refreshPlaybackQueueUI();
+
+        } catch (...) {
+            // Hết bài
+            handleStop();
+            ui->labelCurrent->setText("Ready to Play");
+            ui->labelDuration->setText("--:-- / --:--");
+            ui->sliderDuration->setValue(0);
+            m_currentSongTitle = "";
+            m_lastPlayedQueueID = -1;
+
+			// Reset biến nhớ để lần sau play lại từ đầu
+            m_lastPlayedQueueID = -1; 
+            qDebug() << "Queue finished.";
+        }
     } else {
-        // Hết bài -> Stop
-        m_currentSongTitle = ""; 
-        media->stop();
+        handleStop();
+
+		// Gỡ file nhạc ra khỏi player
+        media->setMedia(QMediaContent()); 
+
         ui->labelCurrent->setText("Ready to Play");
-        ui->labelDuration->setText("--:-- / --:--");
-        ui->sliderDuration->setValue(0);
-        qDebug() << "Queue finished.";
+        m_currentSongTitle = "";
+        m_lastPlayedQueueID = -1;
     }
 }
 
@@ -418,21 +382,44 @@ void MainWindow::handleNext() {
 // EVENT: PREVIOUS
 // -------------------------------------------------------------
 void MainWindow::handlePrev() {
-	logCurrentSongListening();
+    logCurrentSongListening();
     songStartTime = QTime::currentTime();
-    auto histVec = player.getHistory().getHistory();
-    if (histVec.empty()) {
+
+    if (player.getHistory().getHistory().empty()) {
         showCustomDialog("Info", "No history available.", QMessageBox::Information);
         return;
     }
+
     try {
-        auto s = player.getHistory().playPreviousSong();
-        player.selectAndPlaySong(s.id);
+        // 1. Lấy bài cũ ra (Pop)
+        auto prevSong = player.getHistory().playPreviousSong();
+
+        // 2. Reset cờ Next (Vì Prev thì ko tính là Up Next)
+        m_isPlayingFromPlayNext = false;
+        
+        // Cập nhật lại ID Queue để logic Next sau này chạy đúng
+        // Nếu bài prev này nằm trong queue thì cập nhật ID, nếu ko thì thôi
+        m_lastPlayedQueueID = prevSong.id; 
+
+        // 3. Phát bài cũ
+        // selectAndPlaySong sẽ tự động PUSH bài hiện tại (bài đang nghe dở) vào History
+        try {
+            player.selectAndPlaySong(prevSong.id);
+        } catch (...) {
+            qDebug() << "Song not in queue, playing anyway.";
+        }
+        
+        // 4.
+        // Xóa cái bài vừa bị selectAndPlaySong đẩy vào History
+        // Để đảm bảo ta đang "Lùi lại" chứ không phải "Tiến tới bài cũ"
         player.getHistory().removeLastAddedSong();
-        updateNowPlaying(s);
-		refreshUI();
+
+        // 5. Update UI
+        updateNowPlaying(prevSong);
+        refreshUI();
+
     } catch (const std::exception& e) {
-        QMessageBox::warning(this, "Error", e.what());
+        showCustomDialog("Error", e.what(), QMessageBox::Warning);
     }
 }
 
@@ -451,52 +438,83 @@ void MainWindow::handleShuffle() {
 }
 
 // -------------------------------------------------------------
-// EVENT: SMART PLAYLIST (Logic Mới lấy từ UI)
+// EVENT: SMART PLAYLIST (Đã thêm bộ lọc trùng lặp)
 // -------------------------------------------------------------
 void MainWindow::handleSmartPlaylist() {
-    // 1. Lấy Start ID từ lineSmartID
+    // 1. Lấy Start ID
     QString startStr = ui->lineSmartID->text();
     bool ok1;
     int startID = startStr.toInt(&ok1);
 
-    // 2. Lấy Size từ lineSmartSize
+    // 2. Lấy Size
     QString sizeStr = ui->lineSmartSize->text();
     bool ok2;
     int size = sizeStr.toInt(&ok2);
 
     if (!ok1 || !ok2) {
-        QMessageBox::warning(this, "Input Error", "Please enter valid numbers for ID and Size.");
+        showCustomDialog("Input Error", "Please enter valid numbers for ID and Size", QMessageBox::Warning);
         return;
     }
 
-    // 3. Gọi logic tạo playlist
+    // 3. Gọi logic tạo playlist từ Backend (Backend cứ việc tạo ra danh sách thô)
     auto smartQ = player.createSmartPlaylist(startID, size);
 
     if (smartQ.size() == 0) {
-        QMessageBox::information(this, "Info", "Could not generate Smart Playlist (check ID range).");
+        showCustomDialog("Info", "Could not generate Smart Playlist (check ID range)", QMessageBox::Information);
         return;
     }
 
-	// Kiểm tra xem hàng đợi có đang rỗng trước khi thêm không
-    bool wasEmpty = player.getPlayBack().empty();
+    // --- BẮT ĐẦU LOGIC LỌC TRÙNG ---
 
-    // 4. Đẩy vào playback queue
-    for (const auto& s : smartQ.getQueue()) {
-        player.getPlayBack().addSong(s);
+    // A. Tạo danh sách các ID đang có sẵn trong Playback Queue
+    std::set<int> existingIDs;
+    const auto& currentQueue = player.getPlayBack().getQueue();
+    for (const auto& s : currentQueue) {
+        existingIDs.insert(s.id);
     }
 
-    // 5. Nếu queue đang rỗng thì init iterator
+    // B. Kiểm tra trạng thái Queue trước khi thêm
+    bool wasEmpty = player.getPlayBack().empty();
+    int addedCount = 0;
+
+    // C. Duyệt qua Smart Playlist và chỉ thêm bài CHƯA CÓ
+    for (const auto& s : smartQ.getQueue()) {
+        // Nếu ID chưa tồn tại trong set existingIDs
+        if (existingIDs.find(s.id) == existingIDs.end()) {
+            player.getPlayBack().addSong(s);
+            
+            // Thêm vào set luôn để tránh trường hợp SmartPlaylist bị lỗi dup nội bộ (phòng hờ)
+            existingIDs.insert(s.id); 
+            addedCount++;
+        }
+    }
+
+    // --- KẾT THÚC LOGIC LỌC ---
+
+    // Kiểm tra kết quả
+    if (addedCount == 0) {
+        showCustomDialog("Info", "All songs in the Smart Playlist are already in the Queue.", QMessageBox::Information);
+        return;
+    }
+
+    // 5. Logic tự động phát nếu trước đó rỗng (Giữ nguyên logic chuẩn của bạn)
     if (wasEmpty && !player.getPlayBack().empty()) {
         auto it = player.getPlayBack().getQueue().begin();
         player.initializePlaybackIterator(it);
         
-        // (Tùy chọn) Cập nhật bài hiện tại lên Label ngay lập tức
         try {
-             updateNowPlaying(*it);
+            // Cập nhật các biến nhớ để tránh lỗi lặp bài khi Next
+            m_isPlayingFromPlayNext = false;
+            m_lastPlayedQueueID = it->id;
+            
+            updateNowPlaying(*it);
         } catch(...) {}
     }
+
     refreshPlaybackQueueUI();
-    QMessageBox::information(this, "Success", "Smart Playlist added to queue!");
+    
+    // Thông báo chi tiết hơn
+    showCustomDialog("Success", QString("Added %1 new songs to queue.").arg(addedCount), QMessageBox::Information);
 }
 
 // -------------------------------------------------------------
@@ -505,9 +523,19 @@ void MainWindow::handleSmartPlaylist() {
 void MainWindow::handleSongDoubleClick(QListWidgetItem* item) {
     if (!item) return;
     int id = item->data(Qt::UserRole).toInt();
-    logCurrentSongListening();          // 1. Lưu thống kê bài cũ
-    songStartTime = QTime::currentTime(); // 2. Reset giờ bắt đầu cho bài mới
+    
+    // 1. Lưu thống kê bài cũ
+    logCurrentSongListening(); 
+    songStartTime = QTime::currentTime(); 
+
+    // 2. Phát bài mới
     player.selectAndPlaySong(id);
+
+    // 3. Cập nhật biến nhớ (Quan trọng để logic Next hoạt động đúng)
+    m_lastPlayedQueueID = id;
+    m_isPlayingFromPlayNext = false;
+
+    // 4. Update UI
     try {
         auto current = player.getPlayBack().getCurrentSong();
         updateNowPlaying(current);
@@ -532,14 +560,12 @@ void MainWindow::handleLibraryDoubleClick(QListWidgetItem* item) {
         if (it->id == id) {
             // --- NẾU TÌM THẤY TRÙNG ---
             // Chỉ hiện thông báo và dừng lại, không làm gì thêm.
-            QMessageBox::information(this, "Notification", "This song is already in the playback queue.");
+			showCustomDialog("Notification", "This song is already in the playback queue", QMessageBox::Information);
             return; // Thoát hàm ngay lập tức
         }
     }
 
     // 3. Nếu không trùng -> Logic: Thêm vào cuối Playback Queue và phát ngay lập tức
-    // Hoặc bạn có thể chỉ play mà không add, tuỳ logic controller của bạn.
-    // Ở đây ta dùng selectAndPlaySong như logic Play By ID
     try {
         models::Song* foundSong = player.getLibrary().findSongByID(id);
 		if (foundSong) {
@@ -549,16 +575,25 @@ void MainWindow::handleLibraryDoubleClick(QListWidgetItem* item) {
 			// Vẽ lại danh sách hiển thị
 			refreshPlaybackQueueUI();  
 
-			if (wasEmpty) {
-				// Nếu danh sách đang rỗng thì phát luôn
+			// Kiểm tra máy có đang rảnh không? (Stopped = Rảnh, Playing/Paused = Bận)
+            bool isPlayerIdle = (media->state() == QMediaPlayer::StoppedState);
+
+			// Chỉ tự động phát khi: Danh sách cũ Rỗng VÀ Máy đang Rảnh
+            if (wasEmpty && isPlayerIdle) {
                 songStartTime = QTime::currentTime(); 
-				player.getPlayBack().setCurrentSongByID(foundSong->id);
+                player.getPlayBack().setCurrentSongByID(foundSong->id);
+                
+				m_isPlayingFromPlayNext = false;
+                m_lastPlayedQueueID = foundSong->id;
+
 				updateNowPlaying(*foundSong);
-			}
+            }
+            // Nếu máy đang bận (ví dụ đang hát bài của Up Next), 
+            // thì bài mới chỉ âm thầm nằm vào danh sách Playback chờ đến lượt.
 		}
 
     } catch (const std::exception& e) {
-        QMessageBox::warning(this, "Error", "Could not play song from library.");
+		showCustomDialog("Error", "Could not play song from library", QMessageBox::Warning);
     }
 }
 
@@ -628,8 +663,7 @@ void MainWindow::on_btnVolume_clicked() {
     } 
     else {
         // --- NGƯỜI DÙNG MUỐN UNMUTE (MỞ LẠI TIẾNG) ---
-        
-        // [FIX LỖI RANDOM GIÁ TRỊ NHỎ]
+
         // Nếu giá trị cũ quá bé (do lúc kéo tay về 0 bị dính số 1, 2...)
         // Thì ta ép nó lên mức 30 cho dễ nghe.
         if (m_lastVolume < 10) {
@@ -719,13 +753,9 @@ void MainWindow::handleSearch() {
             {
                 // Với Real-time search, ID thường cũng nên dùng contains (Partial Match)
                 // Ví dụ gõ "1" sẽ ra ID 1, 10, 12... thay vì bắt buộc gõ đúng "10"
-                // Tùy bạn chọn, ở đây mình giữ nguyên logic cũ của bạn (Exact Match)
                 if (QString::number(s.id) == keyword) {
                     isMatch = true;
                 }
-                
-                // GỢI Ý: Nếu muốn tìm ID kiểu 'gần đúng' luôn thì dùng dòng dưới:
-                // if (QString::number(s.id).contains(keyword)) isMatch = true;
                 break;
             }
             case 1: // By Title
@@ -753,77 +783,26 @@ void MainWindow::handleSearch() {
 
         // 5. Thêm vào list
         if (isMatch) {
-            QString displayText = QString::number(s.id) + " - " + qTitle + " (" + qArtist + ")";
+            QString displayText = QString::number(s.id) + " - " + qTitle;
+            
+			// Logic hiển thị linh hoạt:
+            if (searchType == 3) {
+                // Nếu đang tìm theo ALBUM -> Phải hiện tên Album
+                // Format: ID - Tên Bài (Ca Sĩ) - [Tên Album]
+                displayText += " (" + qArtist + ") - [" + qAlbum + "]";
+            }
+            else {
+                // Các trường hợp khác (ID, Tên, Ca sĩ) -> Hiện Ca sĩ là đủ
+                displayText += "  -  " + qArtist;
+            }
             QListWidgetItem* item = new QListWidgetItem(displayText, ui->listSearchResult);
+           
+            // Thêm Tooltip để nếu dài quá thì di chuột vào vẫn thấy hết
+            item->setToolTip(displayText);
+           
             item->setData(Qt::UserRole, s.id);
-            foundAny = true;
         }
     }
-}
-
-// -------------------------------------------------------------
-// EVENT: Xóa bài hát từ Playback Queue
-// -------------------------------------------------------------
-void MainWindow::handleDeleteFromQueue() {
-    // 1. Lấy text từ ô nhập liệu
-    QString textIndex = ui->lineIDdelete->text();
-    bool ok;
-    int visualIndex = textIndex.toInt(&ok);
-
-    // 2. Kiểm tra dữ liệu nhập vào
-    if (!ok || visualIndex < 1) {
-        QMessageBox::warning(this, "Input Error", "Please enter a valid Song ID (number).");
-        return;
-    }
-
-    // 3. Truy cập vào Queue để tìm ID gốc tại vị trí đó
-    // Lưu ý: PlaybackQueue trả về reference, nhưng ta cần iterator để duyệt
-    const auto& queue = player.getPlayBack().getQueue();
-
-    // Kiểm tra nếu số nhập vào lớn hơn độ dài danh sách
-    if (visualIndex > queue.size()) {
-        QMessageBox::warning(this, "Error", "Index out of range.");
-        return;
-    }
-    // 4. Tìm bài hát tại vị trí (visualIndex - 1)
-    // Vì danh sách hiển thị từ 1, nhưng mảng/list tính từ 0
-    auto it = queue.begin();
-    std::advance(it, visualIndex - 1); // Di chuyển con trỏ đến đúng bài đó
-
-    int originalID = it->id; // Đây là ID gốc
-    // 5. Gọi hàm xóa từ Backend
-    // Lưu ý: player.getPlayBack() trả về tham chiếu đến đối tượng PlaybackQueue
-    player.getPlayBack().removeSong(originalID);
-
-    // 6. CẬP NHẬT GIAO DIỆN 
-    
-    // a. Vẽ lại danh sách Playback Queue (để dòng bị xóa biến mất khỏi list)
-    refreshPlaybackQueueUI(); 
-
-    // b. Xử lý trường hợp bài đang hát bị xóa
-    // Vì logic removeSong của bạn đã tự động chuyển `currentSong` sang bài kế tiếp (next),
-    // nên ta cần cập nhật lại nhãn "Current Song" và phát bài mới đó.
-    if (player.getPlayBack().empty()) {
-        // Nếu xóa hết sạch thì dừng nhạc và reset giao diện
-        media->stop();
-        ui->labelCurrent->setText("Ready to play");
-        ui->labelDuration->setText("--:-- / --:--");
-        ui->sliderDuration->setValue(0);
-    } else {
-        // Nếu còn bài, cập nhật thông tin bài hiện tại mới (do con trỏ đã dịch chuyển)
-        try {
-            auto current = player.getPlayBack().getCurrentSong();
-            updateNowPlaying(current); // Hàm này sẽ hiển thị tên bài mới và play audio
-        } catch (...) {
-            // Trường hợp xóa xong con trỏ current bị lỗi 
-        }
-    }
-
-    // 7. Xóa trắng ô nhập liệu để nhập cái tiếp theo cho nhanh
-    ui->lineIDdelete->clear();
-    
-    // (Tùy chọn) Focus lại vào ô nhập để nhập tiếp không cần click chuột
-    ui->lineIDdelete->setFocus();
 }
 
 // -------------------------------------------------------------
@@ -832,7 +811,7 @@ void MainWindow::handleDeleteFromQueue() {
 void MainWindow::closeEvent(QCloseEvent *event) {
     // Trước khi đóng, gọi hàm lưu session
     logCurrentSongListening(); // Ghi nhận bài đang nghe dở trước khi tắt
-    player.saveSession();
+    player.saveSession(m_currentSongID, m_lastPlayedQueueID, m_isPlayingFromPlayNext);
     
     // Chấp nhận đóng cửa sổ
     event->accept();
@@ -843,11 +822,19 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 // -------------------------------------------------------------
 void MainWindow::handlePlayPause() {
 	if (!media) return;
-	if (media->state() == QMediaPlayer::PlayingState) {
-		media->pause();
-	} else {
+
+	// Kiểm tra xem có bài nào đang được nạp không?
+	// Nếu m_currentSongTitle rỗng (tức là đang "Ready to Play") -> Khóa nút Play
+    if (m_currentSongTitle.isEmpty()) {
+		ui->btnPlayPause->setChecked(false);
+        return; 
+    }
+
+    if (media->state() == QMediaPlayer::PlayingState) {
+        media->pause();
+    } else {
         media->play();
-	}
+    }
 }
 
 // -------------------------------------------------------------
@@ -898,7 +885,7 @@ void MainWindow::onMediaStateChanged(QMediaPlayer::State state) {
 }
 
 // -------------------------------------------------------------
-// HÀM CẬP NHẬT GIAO DIỆN HISTORY ////////////////////////////////////////////////////////////////////////////////////
+// HÀM CẬP NHẬT GIAO DIỆN HISTORY
 // -------------------------------------------------------------
 void MainWindow::refreshHistoryUI() {
     // Không cần tự vẽ listHistory nữa (vì đã xóa widget đó ở UI Main)
@@ -925,7 +912,7 @@ void MainWindow::refreshPlayNextUI() {
         layout->setContentsMargins(5, 0, 0, 0); 
         layout->setSpacing(10);
 
-        QString displayText = QString::number(q.id) + " - " + QString::fromStdString(q.title);
+        QString displayText = QString::number(q.id) + " - " + QString::fromStdString(q.title)  + " - " + QString::fromStdString(q.artist);
         QLabel* lblName = new QLabel(displayText);
         
         lblName->setObjectName("lblCardTitle"); 
@@ -987,7 +974,7 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 // -------------------------------------------------------------
 void MainWindow::handlePlaylistSelected(const std::vector<int>& songIds, QString playlistName) {
     if (songIds.empty()) {
-        QMessageBox::information(this, "Info", "This playlist is empty.");
+		showCustomDialog("Info", "This playlist is empty", QMessageBox::Information);
         return;
     }
 
@@ -999,8 +986,8 @@ void MainWindow::handlePlaylistSelected(const std::vector<int>& songIds, QString
 
     // 3. Kiểm tra kết quả
     if (addedCount == 0) {
-        QMessageBox::information(this, "Info", "No new songs added. All songs in this playlist are already in the queue.");
-        return;
+        showCustomDialog("Info", "No new songs added. All songs in this playlist are already in the queue", QMessageBox::Information);
+		return;
     }
 
     // 4. Logic tự động phát nếu trước đó hàng đợi rỗng
@@ -1009,6 +996,8 @@ void MainWindow::handlePlaylistSelected(const std::vector<int>& songIds, QString
         player.initializePlaybackIterator(it);
         
         try {
+			m_isPlayingFromPlayNext = false;
+            m_lastPlayedQueueID = it->id;
             updateNowPlaying(*it);
             // media->play(); // Bỏ comment nếu muốn tự động phát nhạc luôn
         } catch (...) {}
@@ -1016,8 +1005,7 @@ void MainWindow::handlePlaylistSelected(const std::vector<int>& songIds, QString
 
     // 5. Cập nhật giao diện
     refreshPlaybackQueueUI();
-    
-    QMessageBox::information(this, "Playlist Added", QString("Added %1 new songs from '%2' to Queue.").arg(addedCount).arg(playlistName));
+	showCustomDialog("Playlist Added", QString("Added %1 new songs from '%2' to Queue.").arg(addedCount).arg(playlistName), QMessageBox::Information);
 }
 
 // -------------------------------------------------------------
@@ -1049,16 +1037,13 @@ void MainWindow::showStatistics() {
     // Lấy số phút nghe hôm nay
     int minsToday = statsManager.getListeningMinutes(QDate::currentDate(), 0);
     
-    // Thay vì ui->labelMinsToday->setText(...), ta dùng qDebug:
     qDebug() << "Minutes listened today:" << minsToday;
 
     // Lấy Top Artist
-    // Lưu ý: Đã xóa const ở tham số lib như hướng dẫn trước
     auto topArtists = statsManager.getTopArtists(player.getLibrary(), 5); 
     
     qDebug() << "--- TOP ARTISTS ---";
     for(const auto& p : topArtists) {
-        // Thay vì ui->listTopArtist->addItem(...), ta dùng qDebug:
         qDebug() << QString::fromStdString(p.first) << " - Listens:" << p.second;
     }
 } 
@@ -1079,7 +1064,7 @@ void MainWindow::handleAddSongToPlayNext(int songID) {
             qDebug() << "Added to Play Next queue.";
         }
     } else {
-        QMessageBox::information(this, "Info", "This song is already in a queue or not found.");
+		showCustomDialog("Info", "This song is already in a queue or not found", QMessageBox::Information);
     }
 }
 
@@ -1087,38 +1072,65 @@ void MainWindow::handleAddSongToPlayNext(int songID) {
 // Hàm xóa trực tiếp bài hát trong Queue
 // -------------------------------------------------------------
 void MainWindow::handleRemoveSongDirectly(int songID) {
-    // 1. Kiểm tra xem có phải xóa bài đang hiển thị trên Label không (Logic View)
-    // Lưu ý: Logic này ở View vẫn cần để biết có nên Stop nhạc hay không
-    // Tuy nhiên, việc "tìm bài tiếp theo" thì để Controller lo.
-    
-    // Gọi Controller xóa và lấy bài tiếp theo (nếu cần thiết)
-    models::Song nextSong = player.removeSong(songID);
+    // 1. Lấy ID bài đang hát (Dùng biến m_currentSongID của UI cho chính xác)
+    int currentPlayingID = m_currentSongID;
 
-    // Cập nhật danh sách
+    // 2. Xóa khỏi Backend
+    player.getPlayBack().removeSong(songID);
+
+    // 3. Cập nhật giao diện danh sách
     refreshPlaybackQueueUI();
 
-    // Kiểm tra kết quả
-    if (nextSong.id != 0) {
-        // Controller trả về 1 bài hát.
-        // Kiểm tra xem bài này có khác bài đang hát không?
-        if (m_currentSongTitle != QString::fromStdString(nextSong.title)) {
-             // Khác -> Nghĩa là bài đang hát đã bị xóa, đây là bài mới
-             updateNowPlaying(nextSong);
-             qDebug() << "Auto switched to: " << QString::fromStdString(nextSong.title);
+    // 4. KIỂM TRA ĐIỀU KIỆN DỪNG NHẠC (QUAN TRỌNG)
+    // Điều kiện: 
+    //   a. ID bị xóa == ID đang hát (currentPlayingID)
+    //   b. VÀ Bài đang hát KHÔNG PHẢI lấy từ Up Next (!m_isPlayingFromPlayNext)
+    //      (Nghĩa là nó đang hát từ chính Playback Queue -> Xóa nó tức là xóa bài đang hát)
+    
+    if (songID == currentPlayingID && !m_isPlayingFromPlayNext) {
+        
+        // --- TRƯỜNG HỢP: XÓA ĐÚNG BÀI ĐANG HÁT TRONG QUEUE ---
+        qDebug() << "Deleting currently playing song from Queue...";
+        media->stop();
+
+        // Logic chuyển bài: Ưu tiên Play Next -> Sau đó mới đến Playback
+        if (!player.getPlayNext().empty()) {
+            // Gọi handleNext để nó tự lo logic lấy bài từ Up Next
+            handleNext(); 
+        } 
+        else if (!player.getPlayBack().empty()) {
+            // Lấy bài kế tiếp trong Playback (iterator đã tự nhảy khi removeSong)
+            try {
+                auto newCurrent = player.getPlayBack().getCurrentSong();
+                
+                // Đánh dấu lại 
+                m_isPlayingFromPlayNext = false; 
+                
+                updateNowPlaying(newCurrent);
+                qDebug() << "Auto switched to next in Queue.";
+            } catch (...) {
+                handleStop();
+            }
+        } 
+        else {
+            // Hết sạch bài
+            handleStop();
+
+			media->setMedia(QMediaContent());
+
+            ui->labelCurrent->setText("Ready to Play");
+            ui->labelDuration->setText("--:-- / --:--");
+            ui->sliderDuration->setValue(0);
+            m_currentSongTitle = "";
         }
-        // Nếu giống -> Nghĩa là xóa bài khác, nhạc vẫn chạy tiếp, không làm gì cả.
     } 
     else {
-        // Controller trả về rỗng -> Có thể là xóa hết sạch rồi
-        // Hoặc xóa bài đang hát và không còn bài nào nữa
-        // Ta kiểm tra xem hàng đợi còn không để chắc chắn
-        if (player.getPlayBack().empty() && player.getPlayNext().empty()) {
-             handleStop();
-             ui->labelCurrent->setText("Ready to Play");
-             ui->labelDuration->setText("--:-- / --:--");
-             ui->sliderDuration->setValue(0);
-             m_currentSongTitle = "";
-        }
+        // --- TRƯỜNG HỢP: XÓA BÀI NỀN (BACKGROUND DELETE) ---
+        // Bao gồm:
+        // 1. Xóa bài ID khác.
+        // 2. Xóa bài ID trùng (ví dụ ID=10), NHƯNG máy đang hát bài ID=10 của nguồn Up Next.
+        // -> Nhạc không bị ngắt quãng.
+        qDebug() << "Deleted background song. Playback continues.";
     }
 }
 
@@ -1133,15 +1145,12 @@ void MainWindow::showCustomDialog(const QString& title, const QString& content, 
     overlay->show();
 
     // 2. Tạo MessageBox
-    QMessageBox msgBox(this); // Quan trọng: Phải có 'this' để nó kế thừa CSS từ MainWindow
+    QMessageBox msgBox(this); // Phải có 'this' để nó kế thừa CSS từ MainWindow
     msgBox.setWindowTitle(title);
     msgBox.setText(content);
     msgBox.setIcon(icon);
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
-
-    // KHÔNG CẦN setStyleSheet() Ở ĐÂY NỮA
-    // Vì nó sẽ tự động nhận style từ XML (Mục 12 vừa thêm)
 
     msgBox.exec();
 

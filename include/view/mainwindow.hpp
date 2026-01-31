@@ -32,14 +32,11 @@ public:
 private slots:
     void handleNext();
     void handlePrev();
-    void handleShuffle();
-    void handlePlayByID();        
+    void handleShuffle();      
     void handleSmartPlaylist();   
     void handleSongDoubleClick(QListWidgetItem* item); 
 	void handleVolumeChanged(int value);
 	void handleSearch();
-    // xóa khỏi back queue
-    void handleDeleteFromQueue();
 	// Slot xử lý click vào danh sách thư viện (Library) 
     void handleLibraryDoubleClick(QListWidgetItem* item);
 	// Slots xử lý Progress Bar 
@@ -72,6 +69,12 @@ private slots:
     // Hàm xóa trực tiếp bài hát trong Queue
 	void handleRemoveSongDirectly(int songID);
 private:
+	// Lưu ID bài hát cuối cùng được phát từ hàng đợi chính
+    int m_lastPlayedQueueID = -1; 
+	// Bài đang hát có phải lấy từ Up Next không?
+    bool m_isPlayingFromPlayNext = false; 
+	// Lưu ID bài đang hát
+	int m_currentSongID = -1; 
     // Biến đệm (Cache)
 	int m_lastVolume; 
 	// Trạng thái Mute hiện tại

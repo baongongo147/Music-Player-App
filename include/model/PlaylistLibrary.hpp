@@ -23,10 +23,11 @@ namespace models {
 		void addPlaylist(const PlaylistInfo& playlist);
 		QJsonArray toJson() const;               // Chuyển danh sách hiện tại thành JSON Array
         void fromJson(const QJsonArray& json);   // Nạp dữ liệu từ JSON Array vào list
+		bool exists(const QString& name) const;
+		bool removePlaylist(const QString& name);
     private:
         std::vector<PlaylistInfo> m_playlists;
 		// Hàm tạo dữ liệu mẫu
         void initDefaultPlaylists(); 
-		
     };
 }

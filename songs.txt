@@ -1,15 +1,50 @@
-1|Attention|Charlie Puth|Voicenotes|media/Attention.mp3
-2|Dangerously|Charlie Puth|Nine Track Mind|media/Dangerously.mp3
-3|Haru Haru|Big Bang|Stand Up|media/haru_haru.mp3
-4|Lemon|Kenshi Yonezu|Unknown|media/Lemon.mp3
-5|Lemon Tree|Fools Garden|Dish of the Day|media/Lemon_Tree.mp3
-6|Rolling In The Deep|Adele|21|media/Rolling_In_The_Deep.mp3
-7|See You Again|Charlie Puth|Nine Track Mind|media/See_You_Again.mp3
-8|Set Fire To The Rain|Adele|21|media/Set_Fire_To_The_Rain.mp3
-9|Shape of You|Ed Sheeran|Divide|media/shape_of_you.mp3
-10|Skyfall|Adele|Unknown|media/Skyfall.mp3
-11|Someone Like You|Adele|21|media/Someone_Like_You.mp3
-12|The Nights|Avicii|The Day - Nights|media/The_Nights.mp3
-13|Waiting for Love|Avicii|Stories|media/Waiting_For_Love.mp3
-14|We Don't Talk Anymore|Charlie Puth|Nine Track Mind|media/We_Don't_Talk_Anymore.mp3
-15|Yummy|Justin Bieber|Changes|media/Yummy.mp3
+1|Alone|Alan Walker|Different World|media/Alone.mp3
+2|Atlantis Is Calling (S.O.S. for Love)|Modern Talking|Ready for Romance|media/Atlantis_Is_Calling.mp3
+3|Attention|Charlie Puth|Voicenotes|media/Attention.mp3
+4|Bad Liar|Imagine Dragons|Origins|media/Bad_Liar.mp3
+5|Believer|Imagine Dragons|Evolve|media/Believer.mp3
+6|Brother Louie|Modern Talking|Ready for Romance|media/Brother_Louie.mp3
+7|Cheri Cheri Lady|Modern Talking|Let's Talk About Love|media/Cheri_Cheri_Lady.mp3
+8|Closer|The Chainsmokers ft. Halsey|Collage|media/Closer.mp3
+9|Dangerously|Charlie Puth|Nine Track Mind|media/Dangerously.mp3
+10|Demons|Imagine Dragons|Night Visions|media/Demons.mp3
+11|Despacito|Luis Fonsi ft. Daddy Yankee|Vida|media/Despacito.mp3
+12|Don't Let Me Down|The Chainsmokers ft. Daya|Collage|media/Don't_Let_Me_Down.mp3
+13|Faded|Alan Walker|Different World|media/Faded.mp3
+14|Forever|Axel Johansson|Single|media/Forever.mp3
+15|Geronimo's Cadillac|Modern Talking|In the Middle of Nowhere|media/Geronimo's_Cadillac.mp3
+16|Haru Haru|BIGBANG|Stand Up|media/Haru_Haru.mp3
+17|Havana|Camila Cabello ft. Young Thug|Camila|media/Havana.mp3
+18|Hello World|Alan Walker & Torine|Single|media/Hello_World.mp3
+19|In the Name of Love|Martin Garrix & Bebe Rexha|Single|media/In_the_Name_of_Love.mp3
+20|Lemon|Kenshi Yonezu|Bootleg|media/Lemon.mp3
+21|Lemon Tree|Fools Garden|Dish of the Day|media/Lemon_Tree.mp3
+22|Lily|Alan Walker, K-391 & Emelie Hollow|Different World|media/Lily.mp3
+23|Love How It Hurts|Axel Johansson|Single|media/Love_How_It_Hurts.mp3
+24|Love Me Like You Do|Ellie Goulding|Delirium|media/Love_Me_Like_You_Do.mp3
+25|Miracles|Axel Johansson|Single|media/Miracles.mp3
+26|Mortal|Axel Johansson|Single|media/Mortal.mp3
+27|Next To Me|Axel Johansson|Single|media/Next_To_Me.mp3
+28|On My Way|Alan Walker, Sabrina Carpenter & Farruko|Live Fast|media/On_My_Way.mp3
+29|Radioactive|Imagine Dragons|Night Visions|media/Radioactive.mp3
+30|Right Here Waiting|Richard Marx|Repeat Offender|media/Right_Here_Waiting.mp3
+31|Rolling In The Deep|Adele|21|media/Rolling_In_The_Deep.mp3
+32|Scared To Be Lonely|Martin Garrix & Dua Lipa|Single|media/Scared_To_Be_Lonely.mp3
+33|See You Again|Wiz Khalifa ft. Charlie Puth|Furious 7|media/See_You_Again.mp3
+34|Set Fire To The Rain|Adele|21|media/Set_Fire_To_The_Rain.mp3
+35|Sexy, Sexy Lover|Modern Talking|Alone|media/Sexy_Sexy_Lover.mp3
+36|Shape of You|Ed Sheeran|Divide|media/The_Shape_of_You.mp3
+37|Sing Me to Sleep|Alan Walker|Different World|media/Sing_Me_to_Sleep.mp3
+38|Skyfall|Adele|Skyfall|media/Skyfall.mp3
+39|So Far Away|Martin Garrix & David Guetta|Single|media/So_Far_Away.mp3
+40|Someone Like You|Adele|21|media/Someone_Like_You.mp3
+41|Something Just Like This|The Chainsmokers & Coldplay|Memories...Do Not Open|media/Something_Just_Like_This.mp3
+42|The Nights|Avicii|The Days / Nights|media/The_Nights.mp3
+43|The River|Axel Johansson|Single|media/The_River.mp3
+44|The Spectre|Alan Walker|Different World|media/The_Spectre.mp3
+45|Thunder|Imagine Dragons|Evolve|media/Thunder.mp3
+46|Thunderclouds|LSD (Labrinth, Sia, Diplo)|Labrinth, Sia & Diplo Present... LSD|media/Thunderclouds.mp3
+47|Waiting For Love|Avicii|Stories|media/Waiting_For_Love.mp3
+48|We Don't Talk Anymore|Charlie Puth ft. Selena Gomez|Nine Track Mind|media/We_Don't_Talk_Anymore.mp3
+49|You Can Win If You Want|Modern Talking|The First Album|media/You_Can_Win_If_You_Want.mp3
+50|Yummy|Justin Bieber|Changes|media/Yummy.mp3

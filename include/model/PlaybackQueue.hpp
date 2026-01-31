@@ -26,5 +26,6 @@ namespace models{
 		void playNext();
 		std::list<Song>& getQueue();
 		void setCurrentSongByID(int id);
+		void clear();
 	};
 }

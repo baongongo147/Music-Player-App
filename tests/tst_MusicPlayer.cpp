@@ -3,6 +3,7 @@
 #include <QTextStream>
 #include <QDir>
 #include <QDebug>
+#include <QCoreApplication> 
 #include <vector>
 
 // Include Controller & Models
@@ -66,7 +67,7 @@ protected:
     void TearDown() override {
         delete player;
         QFile::remove(TEST_DB_FILE);
-        QFile::remove("session.json");
+        QFile::remove("test_session.json"); // [FIX] Xóa đúng file test session
         QDir dir(TEST_MEDIA_DIR);
         dir.removeRecursively();
     }
@@ -134,9 +135,9 @@ TEST_F(MusicPlayerTest, PlayNextSongPriority) {
 
     // --- LẦN 2: Bấm Next ---
     // Mong đợi: Lấy từ Main Queue (ID 3) - Haru Haru
-    nextSong = player->playNextSongLogic();
-    EXPECT_EQ(nextSong.id, 3);
-    EXPECT_EQ(nextSong.title, "Haru Haru");
+    models::Song nextSong2 = player->playNextSongLogic();
+    EXPECT_EQ(nextSong2.id, 3);
+    EXPECT_EQ(nextSong2.title, "Haru Haru");
 }
 
 // ========================================================
@@ -201,18 +202,85 @@ TEST_F(MusicPlayerTest, ShuffleLogic) {
 // ========================================================
 // 7. TEST VOLUME SAVE/RESTORE
 // ========================================================
-TEST_F(MusicPlayerTest, SessionVolume) {
-    player->setVolume(88);
-    player->saveSession("test_session.json");
+TEST_F(MusicPlayerTest, SessionSaveRestoreFull) {
+    // 1. Giả lập trạng thái ứng dụng trước khi tắt
+    player->setVolume(75);
+    
+    int mockCurrentID = 5;      // Đang hát bài số 5
+    int mockLastQueueID = 4;    // Bài trước đó là số 4
+    bool mockIsFromNext = true; // Đang hát từ chế độ Up Next
 
+    // 2. Lưu Session với đầy đủ tham số
+    player->saveSession(mockCurrentID, mockLastQueueID, mockIsFromNext, "test_session.json");
+
+    // 3. Reset dữ liệu (Giả lập tắt app)
     player->setVolume(0);
+    // (Lưu ý: Bạn cần đảm bảo MusicPlayer có hàm reset biến restored về mặc định 
+    // hoặc đơn giản là tạo player mới, nhưng ở đây ta test trên player hiện tại)
+
+    // 4. Khôi phục lại
     player->restoreSession("test_session.json");
 
-    EXPECT_EQ(player->getVolume(), 88);
+    // 5. KIỂM TRA KẾT QUẢ
+    EXPECT_EQ(player->getVolume(), 75); // Volume đúng
+    
+    // Kiểm tra các biến Logic (Bạn cần đảm bảo MusicPlayer có getter cho các biến này)
+    EXPECT_EQ(player->getRestoredLastQueueID(), 4); 
+    EXPECT_TRUE(player->getRestoredIsFromNext());
+}
+
+// ========================================================
+// 8. TEST TÍNH NĂNG TÌM KIẾM (Search)
+// ========================================================
+TEST_F(MusicPlayerTest, SearchFunction) {
+    // Tìm kiếm theo Tên (Title) - "Lemon"
+    // Mong đợi: Ra 2 bài ("Lemon" và "Lemon Tree")
+    auto results1 = player->searchSongs("Lemon", 1); 
+    EXPECT_GE(results1.size(), 2); 
+    
+    // Tìm kiếm theo ID - "10"
+    // Mong đợi: Ra 1 bài (Skyfall)
+    auto results2 = player->searchSongs("10", 0);
+    ASSERT_EQ(results2.size(), 1);
+    EXPECT_EQ(results2[0].title, "Skyfall");
+
+    // Tìm kiếm không thấy - "Nhạc Vàng"
+    auto results3 = player->searchSongs("Nhạc Vàng", 1);
+    EXPECT_TRUE(results3.empty());
+}
+
+// ========================================================
+// 9. TEST SMART PLAYLIST
+// ========================================================
+TEST_F(MusicPlayerTest, SmartPlaylistGeneration) {
+    // Setup: Bài 1 là "Attention" (Charlie Puth)
+    // Trong mock DB, bài 2, 7, 14 cũng là Charlie Puth
+    // Mong đợi: Tạo Smart Playlist từ bài 1 sẽ tìm thấy các bài cùng ca sĩ
+    
+    int startID = 1;
+    int maxSize = 5;
+
+    auto smartQueue = player->createSmartPlaylist(startID, maxSize);
+    
+    // Kiểm tra danh sách không rỗng
+    EXPECT_FALSE(smartQueue.getQueue().empty());
+    
+    // Kiểm tra bài đầu tiên phải là bài gốc (Attention)
+    EXPECT_EQ(smartQueue.getQueue().front().id, 1);
+
+    // Kiểm tra có tìm thấy bài liên quan không (Ví dụ bài 2 - Dangerously)
+    bool foundNeighbor = false;
+    for(const auto& s : smartQueue.getQueue()) {
+        if(s.id == 2) foundNeighbor = true;
+    }
+    EXPECT_TRUE(foundNeighbor); // Phải tìm thấy bài cùng ca sĩ
 }
 
 // Entry Point
 int main(int argc, char **argv) {
+    // Khởi tạo QCoreApplication để hỗ trợ QMediaPlayer/QTimer
+    QCoreApplication app(argc, argv); 
+    
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

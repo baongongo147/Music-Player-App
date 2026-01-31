@@ -94,4 +94,13 @@ namespace models{
     }
 
 	std::list<Song>& PlaybackQueue::getQueue() {return queue;}
+
+	void PlaybackQueue::clear() {
+		// 1. Xóa sạch dữ liệu trong list
+		queue.clear();
+
+		// 2. [QUAN TRỌNG] Reset con trỏ hiện tại về end()
+		// Nếu không reset, con trỏ sẽ trỏ vào vùng nhớ rác -> Crash app ngay lập tức
+		currentSong = queue.end();
+	}
 }

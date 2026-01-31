@@ -33,6 +33,27 @@ namespace models {
         m_playlists.push_back(mix);
     }
 
+	// Kiểm tra xem tên playlist đã có chưa (Không phân biệt hoa thường)
+    bool PlaylistLibrary::exists(const QString& name) const {
+        for (const auto& pl : m_playlists) {
+            if (pl.name.compare(name, Qt::CaseInsensitive) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Xóa playlist theo tên
+    bool PlaylistLibrary::removePlaylist(const QString& name) {
+        for (auto it = m_playlists.begin(); it != m_playlists.end(); ++it) {
+            if (it->name == name) {
+                m_playlists.erase(it);
+                return true;
+            }
+        }
+        return false;
+    }
+
 	void PlaylistLibrary::addPlaylist(const PlaylistInfo& playlist) {
         m_playlists.push_back(playlist);
     }

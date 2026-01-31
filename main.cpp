@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
 
     MainWindow w("songs.txt");
     w.resize(600, 400);
-    w.show();
+    w.showFullScreen();
 
     return app.exec();
 }

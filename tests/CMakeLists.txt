@@ -3,6 +3,7 @@ include(FetchContent)
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE  # <--- Thêm dòng này vào
 )
 
 # Ép GTest dùng chung thư viện Runtime với Qt trên Windows để tránh lỗi Linker

@@ -24,6 +24,11 @@ namespace controller {
 		std::list<models::Song>::iterator lastSequentialPosition; 
 		// Biến lưu volume
 		int m_volume = 50;
+
+		// Biến lưu ID của bài hát cuối cùng trong hàng đợi và trạng thái xuất phát của nó
+		int m_restoredLastQueueID = -1;
+		// Biến kiểm tra bài đang hát là từ PlayNext hay Queue
+    	bool m_restoredIsFromNext = false;
 		
 	public:
 		MusicPlayer(const std::string& songFile) : library(songFile) {}
@@ -49,8 +54,11 @@ namespace controller {
 		void playSong();
 
 		//hàm lưu dữ liệu và khôi phục dữ liệu
-		void saveSession(const QString& filename = "session.json");
+		void saveSession(int currentPlayingID, int lastQueueID, bool isFromNext, const QString& filename = "session.json");
     	void restoreSession(const QString& filename = "session.json");
+		// Thêm getter để MainWindow lấy dữ liệu sau khi restore
+		int getRestoredLastQueueID() const { return m_restoredLastQueueID; }
+		bool getRestoredIsFromNext() const { return m_restoredIsFromNext; }
 
 		// Hàm tìm kiếm
 		std::vector<models::Song> searchSongs(const QString& keyword, int searchType);
@@ -77,6 +85,8 @@ namespace controller {
         // 3. Logic chuyển bài tiếp theo (Gộp logic PlayNextQueue và MainQueue)
         // Thay thế cho việc gọi lẻ tẻ ở MainWindow
         models::Song playNextSongLogic();
+		bool checkPlaylistExists(const QString& name) const;
+		bool deletePlaylist(const QString& name);
 	};
 }
 

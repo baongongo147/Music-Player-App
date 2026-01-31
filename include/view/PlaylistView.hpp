@@ -1,24 +1,40 @@
-#pragma once
+#ifndef PLAYLISTVIEW_HPP
+#define PLAYLISTVIEW_HPP
+
 #include <QWidget>
-#include <QListWidget>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton> 
+#include <QMessageBox>
 #include "../../include/controller/MusicPlayer.hpp"
+
+// Namespace UI
+namespace Ui {
+class PlaylistView;
+}
 
 class PlaylistView : public QWidget {
     Q_OBJECT
+
 public:
     explicit PlaylistView(controller::MusicPlayer* player, QWidget *parent = nullptr);
-	void loadPlaylists();
+    ~PlaylistView();
+
+    void loadPlaylists();
+
 signals:
-    // Tín hiệu bắn ra khi người dùng chọn playlist, gửi kèm danh sách ID bài hát
-    void playlistClicked(const std::vector<int>& songIds, QString playlistName);
+    // Signal bắn ra khi chọn playlist để MainWindow biết mà phát nhạc
+    void playlistClicked(const std::vector<int>& songIDs, QString playlistName);
+
 private slots:
-    void onItemClicked(QListWidgetItem* item);
-    void handleCreatePlaylist(); 
+    void handleCreatePlaylist();
+
 private:
+    Ui::PlaylistView *ui; // Con trỏ UI
     controller::MusicPlayer* m_player;
-    QListWidget* m_listWidget;
-	QPushButton* m_btnCreate;
+    
+    // Hàm tiện ích nội bộ
+    void setupDialogStyle(QDialog* dialog); 
+
+	// Hàm hiển thị thông báo có màn đen
+	void showCustomDialog(const QString& title, const QString& content, QMessageBox::Icon icon);
 };
+
+#endif // PLAYLISTVIEW_HPP
